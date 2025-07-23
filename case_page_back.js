@@ -232,77 +232,75 @@ $(function() {
         true
     );
 
-    /* БЫСТРЫЕ ШАБЛОНЫ */
+ /* БЫСТРЫЕ ШАБЛОНЫ */
 
-    // Выносим ссылки для быстрого применения шаблона и стилизуем их
-    var addButton = function(containerSelector, templateId, buttonText, styles) {
-        var buttonId = `applyMacroButton_${templateId}`;
-        var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
-        addCode(containerSelector, buttonHtml, true);
-        handleMacroClick(templateId);
-        applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID 
-    };
+// Выносим ссылки для быстрого применения шаблона и стилизуем их
+var addButton = function(containerSelector, templateId, buttonText, styles) {
+    var buttonId = `applyMacroButton_${templateId}`;
+    var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
+    addCode(containerSelector, buttonHtml, true);
+    handleMacroClick(templateId);
+    applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID 
+};
 
-
-    // По клику находим ID шаблона, и применяем его, подставляя ID
-    var handleMacroClick = function(templateId) {
-        $(document).on('click', `#applyMacroButton_${templateId}`, function() {
-            // Применяем шаблон по клику на ссылку  
-            $(`.apply-template[href="template_${templateId}"]`).click();
-        });
-    };
-
-    // Создаем функцию для стилизации ссылок
-    var applyStyles = function(selector, styles) {
-        $(selector).css(styles);
-    };
-
-    // Создаем селектор для блока, в который добавим ссылки 
-    var buttonContainerSelector = '.text-area-box .attach-wrapper';
-
-    // Проверяем, если кастомная ссылка на шаблон уже есть на странице, если нет, то добавляем
-    if ($('#macroButtonsContainer').length === 0) {
-        addCode(
-            buttonContainerSelector, 
-            '<div id="macroButtonsContainer" style="margin-top: 10px;"></div>',
-            true
-        );
-    }
-
-    // Добавляем селектор для созданного блока ссылок
-    var templateSelector = '#macroButtonsContainer';
-
-    // Очищаем существующие данные, чтобы добавить определенные шаблоны
-    $('#macroButtonsContainer').empty();
-
-    // Добавляем новые ссылки для применения шаблона и стилизуем их
-    addButton(templateSelector, 210005, 'Шаблон 1', { 
-        'color': '#e48000',
-        'text-decoration': 'none',
-        'margin-left': '30px',
-        'font-size': '11px',
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
+// По клику находим ID шаблона, и применяем его, подставляя ID
+var handleMacroClick = function(templateId) {
+    $(document).on('click', `#applyMacroButton_${templateId}`, function() {
+        // Применяем шаблон по клику на ссылку  
+        $(`.apply-template[href="template_${templateId}"]`).click();
     });
-    
-    addButton(templateSelector, 179994, 'Шаблон 2', {
-        'color': '#00868f',
-        'text-decoration': 'none',
-        'margin-left': '5px',
-        'font-size': '11px',
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
-    });
+};
 
-    addButton(templateSelector, 163903, 'Шаблон 3', {
-        'color': '#ac00ae', 
-        'text-decoration': 'none',
-        'margin-left': '5px', 
-        'font-size': '11px', 
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
-    });
+// Создаем функцию для стилизации ссылок
+var applyStyles = function(selector, styles) {
+    $(selector).css(styles);
+};
 
+// ИЗМЕНЯЕМ СЕЛЕКТОР - добавляем в тот же блок, что и "Прикрепить файл"
+var buttonContainerSelector = '.attach-first';
+
+// Проверяем, если кастомная ссылка на шаблон уже есть на странице, если нет, то добавляем
+if ($('#macroButtonsContainer').length === 0) {
+    addCode(
+        buttonContainerSelector, 
+        '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px;"></div>',
+        true
+    );
+}
+
+// Добавляем селектор для созданного блока ссылок
+var templateSelector = '#macroButtonsContainer';
+
+// Очищаем существующие данные, чтобы добавить определенные шаблоны
+$('#macroButtonsContainer').empty();
+
+// Добавляем новые ссылки для применения шаблона и стилизуем их
+addButton(templateSelector, 210005, 'Шаблон 1', { 
+    'color': '#e48000',
+    'text-decoration': 'none',
+    'margin-right': '10px', // ИЗМЕНЯЕМ margin-left на margin-right
+    'font-size': '11px',
+    'font-weight': '650',
+    'letter-spacing': '0.33px' 
+});
+
+addButton(templateSelector, 179994, 'Шаблон 2', {
+    'color': '#00868f',
+    'text-decoration': 'none',
+    'margin-right': '10px', // ИЗМЕНЯЕМ margin-left на margin-right
+    'font-size': '11px',
+    'font-weight': '650',
+    'letter-spacing': '0.33px' 
+});
+
+addButton(templateSelector, 163903, 'Шаблон 3', {
+    'color': '#ac00ae', 
+    'text-decoration': 'none',
+    'margin-right': '10px', // ИЗМЕНЯЕМ margin-left на margin-right
+    'font-size': '11px', 
+    'font-weight': '650',
+    'letter-spacing': '0.33px' 
+});
 
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
 
