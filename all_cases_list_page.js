@@ -60,7 +60,7 @@ $(document).ready(function() {
 $(document).ready(function() {
     $('#records_list_sorting_chosen .chosen-single').css({
         'color': '#067826',             
-        'background': '#ffe3e3',             
+        'background': '#ffeaea',             
         'font-weight': '650',      
         'letter-spacing': '0.6px',      
         'font-size': '12px',      
