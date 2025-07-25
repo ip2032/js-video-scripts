@@ -1,3 +1,14 @@
+// ==UserScript==
+// @name         case_page.js
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Test script for Omnidesk templates with chat support
+// @author       You
+// @match        https://st.omnidesk.ru/staff/cases/record*
+// @match        https://st.omnidesk.ru/staff/cases/chat/*
+// @grant        none
+// ==/UserScript==
+
 $(function() {
     /**
      * Ваш сайт, для примеров работы с запросами
@@ -276,16 +287,12 @@ $(function() {
 
     // Функция для добавления шаблонов
     function addTemplateButtons() {
-        console.log('Добавляем кнопки шаблонов...');
-
         // Ищем контейнеры для разных типов страниц
         var emailContainer = $('.attach-first');  // Для email обращений
         var chatContainer = $('.chat_msg_win_actions'); // Для чатов
 
         // Для EMAIL обращений
         if (emailContainer.length > 0 && $('#macroButtonsContainer').length === 0) {
-            console.log('Найден email контейнер, добавляем шаблоны');
-
             addCode(
                 '.attach-first',
                 '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
@@ -320,14 +327,10 @@ $(function() {
                 'font-weight': '650',
                 'letter-spacing': '0.33px'
             });
-
-            console.log('✓ Email шаблоны добавлены');
         }
 
-        // Для ЧАТОВ - добавляем рядом с иконками, как для email
+        // Для ЧАТОВ - добавляем рядом с иконками
         if (chatContainer.length > 0 && $('#chatMacroButtonsContainer').length === 0) {
-            console.log('Найден чат контейнер, добавляем шаблоны');
-
             // Находим ul.clearfix с иконками
             var chatIconsList = chatContainer.find('ul.clearfix');
             if (chatIconsList.length > 0) {
@@ -366,51 +369,16 @@ $(function() {
             // Обработчики кликов для чата
             $(document).on('click', '#applyChatMacroButton_327703', function(e) {
                 e.preventDefault();
-                console.log('Клик по шаблону 327703 (Акция)');
-
-                // Пробуем разные варианты применения шаблона в чате
-                var template1 = $(`.apply-template[href="template_327703"]`);
-                var template2 = $(`.apply-template[data-template-id="327703"]`);
-                var template3 = $(`.template-item[data-id="327703"]`);
-                var template4 = $(`.template_row[rel="327703"]`);
-                var template5 = $(`._template_row[rel="327703"]`);
-                var template6 = $(`li[rel="327703"]`);
-
-                console.log('Поиск шаблонов:');
-                console.log('template_327703:', template1.length);
-                console.log('data-template-id:', template2.length);
-                console.log('template-item:', template3.length);
-                console.log('template_row[rel]:', template4.length);
-                console.log('_template_row[rel]:', template5.length);
-                console.log('li[rel]:', template6.length);
-
-                // Пробуем применить найденный шаблон
-                if (template1.length > 0) {
-                    console.log('Применяем через .apply-template[href]');
-                    template1.click();
-                } else if (template5.length > 0) {
-                    console.log('Применяем через ._template_row[rel]');
-                    template5.click();
-                } else if (template6.length > 0) {
-                    console.log('Применяем через li[rel]');
-                    template6.click();
+                var template = $(`._template_row[rel="327703"]`);
+                if (template.length > 0) {
+                    template.click();
                 } else {
-                    console.log('Шаблон с ID 327703 не найден. Ищем все возможные селекторы...');
-                    console.log('Все .apply-template:', $('.apply-template').length);
-                    console.log('Все ._template_row:', $('._template_row').length);
-                    console.log('Все [rel]:', $('[rel]').length);
-
-                    // Выводим первые несколько найденных элементов для анализа
-                    $('._template_row').slice(0, 3).each(function(i, el) {
-                        console.log('_template_row ' + i + ':', $(el).attr('rel'), $(el).text().trim());
-                    });
+                    $(`.apply-template[href="template_327703"]`).click();
                 }
             });
 
             $(document).on('click', '#applyChatMacroButton_179994', function(e) {
                 e.preventDefault();
-                console.log('Клик по шаблону 179994 (Реализация)');
-
                 var template = $(`._template_row[rel="179994"]`);
                 if (template.length > 0) {
                     template.click();
@@ -421,8 +389,6 @@ $(function() {
 
             $(document).on('click', '#applyChatMacroButton_163903', function(e) {
                 e.preventDefault();
-                console.log('Клик по шаблону 163903 (Каталог)');
-
                 var template = $(`._template_row[rel="163903"]`);
                 if (template.length > 0) {
                     template.click();
@@ -430,14 +396,12 @@ $(function() {
                     $(`.apply-template[href="template_163903"]`).click();
                 }
             });
-
-            console.log('✓ Чат шаблоны добавлены');
         }
     }
 
     // Запускаем добавление шаблонов с задержкой
     $(document).ready(function() {
-        setTimeout(addTemplateButtons, 800); // Увеличил задержку для чатов
+        setTimeout(addTemplateButtons, 800);
     });
 
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
