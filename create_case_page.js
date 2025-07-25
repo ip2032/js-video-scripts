@@ -261,7 +261,7 @@ var buttonContainerSelector = '.attach-first';
 if ($('#macroButtonsContainer').length === 0) {
     addCode(
         buttonContainerSelector,
-        '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px;"></div>',
+        '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
         true
     );
 }
