@@ -1,494 +1,586 @@
+// ==UserScript==
+// @name         case_page.js
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Test script for Omnidesk templates with chat support
+// @author       You
+// @match        https://st.omnidesk.ru/staff/cases/record*
+// @match        https://st.omnidesk.ru/staff/cases/chat/*
+// @grant        none
+// ==/UserScript==
+
 $(function() {
     /**
      * Ваш сайт, для примеров работы с запросами
      */
+
     var URL = 'https://omnidesk.ru';
 
     /**
      * Некоторые переменные, доступные в глобальной видимости Омнидеска:
-     * CurrentCaseId, CurrentUserId, CurrentStaffId, CurrentClientId
+     * CurrentCaseId
+     * CurrentUserId
+     * CurrentStaffId
+     * CurrentClientId
+      *
+     * Данные в этих переменных уже можно использовать чтобы получить более развернутый результат по API Омнидеска
+     * https://omnidesk.ru/api/introduction/intro
      */
+
     var CASE_ID = CurrentCaseId;
     var CASE_URL = document.location.href;
 
     /**
-     * Селекторы для примеров
+     * Некоторые селекторы для примеров
      */
     var HORIZONTAL_MENU_SELECTOR = '.header-container';
     var HORIZONTAL_MENU_BUTTONS_SELECTOR = '.global-actions > .global-actions-list:last-child';
     var HORIZONTAL_MENU_ELEMENTS_SELECTOR = '.primary-nav';
+
     var INTEGRATION_PANEL_SELECTOR = '#integrations_info_panel';
     var INFORMATION_PANEL_SELECTOR = '#info_user_info_panel';
 
     /** HELPERS */
-    var checkNotUndefined = function(data) {
-        return (typeof data !== 'undefined');
-    };
 
+    /**
+     * Проверяем на undefined
+     */
+    var checkNotUndefined = function(data) {
+        return (typeof data === 'undefined') ? false : true;
+    }
+
+    /**
+     * Вставка в конец или в начало элемента
+     */
     var addCode = function(selector, htmlCode, after) {
         var element = $(selector);
-        if (element.length === 0) {
-            console.warn('Селектор не найден:', selector);
-            return;
-        }
-        
-        if (checkNotUndefined(after) && after === true) {
+
+        if(checkNotUndefined(after) === true && after === true) {
             element.append(htmlCode);
         } else {
             element.prepend(htmlCode);
         }
     };
 
-    // Добавляем общие стили один раз
-    function addGlobalStyles() {
-        if ($('#omnidesk-custom-styles').length === 0) {
-            $('<style id="omnidesk-custom-styles">').html(`
-                .attach-first {
-                    display: flex !important;
-                    align-items: center !important;
-                    flex-wrap: nowrap !important;
-                }
-                #emailMacroButtons, #chatMacroButtons {
-                    display: inline-flex !important;
-                    align-items: center !important;
-                    gap: 8px !important;
-                }
-                .macro-button {
-                    text-decoration: none !important;
-                    font-size: 11px !important;
-                    font-weight: 650 !important;
-                    letter-spacing: 0.33px !important;
-                    cursor: pointer !important;
-                    margin-right: 0 !important;
-                }
-                .macro-button:hover {
-                    opacity: 0.7 !important;
-                }
-            `).appendTo('head');
-        }
-    }
+    // CSS для выравнивания кнопок шаблонов с "Прикрепить файл"
+    $(document).ready(function() {
+        $('<style>').prop('type', 'text/css').html(`
+            .attach-first {
+                display: flex !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important;
+            }
+            #macroButtonsContainer {
+                display: inline-flex !important;
+                align-items: center !important;
+                vertical-align: middle !important;
+                gap: 8px !important;
+            }
+        `).appendTo('head');
+    });
 
-    /** ОСНОВНЫЕ НАСТРОЙКИ ИНТЕРФЕЙСА */
-    function initializeInterface() {
-        // Скрываем ненужные элементы
+    /** EXAMPLES */
+
+    // Скрываем ссылку «Переслать целиком» в дополнительных опциях
+    $(document).ready(function() {
         $('#ForwardCase').hide();
+    });
+
+    // Скрываем иконку «Переслать ответ», отображаемую при наведении на письмо
+    $(document).ready(function() {
         $('i.icon-share-alt.fas.fa-share[title="Переслать"]').hide();
-        
-        // Отключаем кастомное поле
+    });
+
+    // Отключаем возможность менять значение кастомного поля «Статус заказа»
+    $(document).ready(function() {
         $('select[name="field_7608"]').prop('disabled', true).trigger('chosen:updated');
-        
-        // Стилизуем элементы интерфейса
-        $('#case_email_id_chosen').find('.chosen-single span').css({
-            'color': '#c43117',
-            'font-weight': '700'
+    });
+
+    // Меняем цвет и выделяем болдом текущий адрес электронной почты в поле «Отвечать с адреса»
+    $(document).ready(function() {
+        var container = $('#case_email_id_chosen');
+
+        container.find('.chosen-single span').css({
+                'color': '#c43117',
+                'font-weight' : '700'
         });
-        
-        // Добавляем элементы в шапку
-        addCode(HORIZONTAL_MENU_ELEMENTS_SELECTOR, 
-            `<li class="nav-item nav-item-web-link inlb">
-                <a class="nav-item-url" href="https://omnidesk.ru">Веб-сайт</a>
-            </li>`, true);
-        
-        addCode(HORIZONTAL_MENU_BUTTONS_SELECTOR,
-            `<li class="global-action-item inlb kb-link" title="База знаний">
-                <a class="nav-item-url" href="https://support.omnidesk.ru/knowledge_base">
-                    <i class="icon fi-rss" style="margin-left: 4px;background-color: #f5d998 !important;color: #459801 !important;font-size: 17px !important;"></i>
-                </a>
-            </li>`, false);
-        
-        addCode(HORIZONTAL_MENU_BUTTONS_SELECTOR,
-            `<li class="global-action-item inlb api-link" title="API">
-                <a class="nav-item-url" href="https://omnidesk.ru/api/introduction#intro">
-                    <i class="icon fi-key"></i>
-                </a>
-            </li>`, false);
-        
-        // Стилизуем шапку
-        $(HORIZONTAL_MENU_SELECTOR).css('border-bottom', 'solid 3px #44BE69');
-        
-        // Подключаем внешний CSS
-        if ($('link[href*="foundation-icons"]').length === 0) {
-            $('body').append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css">');
-        }
-        
-        // Подключаем Font Awesome для иконок
-        if ($('link[href*="font-awesome"]').length === 0) {
-            $('body').append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">');
-        }
+    });
+
+    // Добавляем новый раздел «Веб-сайт» в шапке страницы
+    addCode(
+        HORIZONTAL_MENU_ELEMENTS_SELECTOR,
+        `<li class="nav-item nav-item-web-link inlb">
+            <a class="nav-item-url" href="https://omnidesk.ru">Веб-сайт</a>
+        </li>`,
+        true
+    );
+
+    // Добавляем новую иконку в шапке справа и задаем кастомные стили
+    addCode(
+        HORIZONTAL_MENU_BUTTONS_SELECTOR,
+        `<li class="global-action-item inlb kb-link" title="База знаний">
+            <a class="nav-item-url" href="https://support.omnidesk.ru/knowledge_base">
+                <i class="icon fi-rss" style="margin-left: 4px;background-color: #f5d998 !important;color: #459801 !important;font-size: 17px !important;"></i>
+            </a>
+        </li>`,
+        false
+    );
+
+    // Добавляем новую иконку в шапке справа в стили Омнидеска
+    addCode(
+        HORIZONTAL_MENU_BUTTONS_SELECTOR,
+        `<li class="global-action-item inlb api-link" title="API">
+            <a class="nav-item-url" href="https://omnidesk.ru/api/introduction#intro">
+                <i class="icon fi-key"></i>
+            </a>
+        </li>`,
+        false
+    );
+
+    /**
+     * Добавляем в горизонтальное меню цвета своей компании
+     * Результат в коде Омнидеска https://www.dropbox.com/s/3vtzym61el1659z/04_custom_styles.png?dl=0
+     */
+    $(document).find(HORIZONTAL_MENU_SELECTOR).css({
+         'border-bottom': 'solid 3px #44BE69',
+    });
+
+
+    /**
+     * Подключаем свой CSS в код Омнидеска. В CSS дополнительные иконки
+     * Результат на странице https://www.dropbox.com/s/jde5uaykf84hsak/05_custom_css.png?dl=0
+     */
+    $(document)
+        .find('body')
+        .append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css">');
+
+
+    /**
+     * Добавляем кастомную информацию в блок о пользователе
+     *
+     * Сначала заголовок
+     */
+    addCode(
+        INFORMATION_PANEL_SELECTOR,
+        `<div class="info_header clearfix">
+            <p>КАСТОМНАЯ ПАНЕЛЬ</p>
+        </div>`,
+        true
+    );
+
+
+    /**
+     * Потом информация
+     *
+     * Допустим, мы запросили информацию извне
+     * $.get(URL + '/api/users/' + CurrentUserId, data, callback);
+     *
+     * и получили такой объект в callback:
+     */
+    var UserInformation = {
+        id: 25553,
+        name: 'Марк Бессонов',
+        tariff_name: 'Максимальный',
+        support_type: 'Постоянная'
+    };
+
+    /**
+     * Отображаем эту информацию
+     * Результат в коде Омнидеска: https://www.dropbox.com/s/5b98ud1hwi97wu5/01_custom_block.png?dl=0
+     */
+    addCode(
+        INFORMATION_PANEL_SELECTOR,
+        `<div class="info_fields">
+            <h6>Логин</h6>
+            <p style="word-wrap: break-word;">#${UserInformation.id}</p>
+
+            <h6>Ссылка на профиль</h6>
+            <p style="word-wrap: break-word;"><a href="${URL}/id/${UserInformation.id}">${UserInformation.name}</a></p>
+
+            <h6>Тариф</h6>
+            <p style="word-wrap: break-word;">${UserInformation.tariff_name}</p>
+
+            <h6>Тип поддержки</h6>
+            <p style="word-wrap: break-word;">${UserInformation.support_type}</p>
+        </div>`,
+        true
+    );
+
+
+    // Добавляем заголовок для кастомной CRM
+    addCode(
+        INFORMATION_PANEL_SELECTOR,
+        `<div class="info_header clearfix">
+            <p>КАСТОМНАЯ CRM</p>
+        </div>`,
+        true
+    );
+
+    /**
+     * Добавляем информацию
+     *
+     * Допустим, мы запросили информацию извне
+     * $.get(URL + '/api/users/' + CurrentUserId, data, callback);
+     *
+     * и получили такой объект в callback:
+     */
+
+    var panelCRM = {
+        id: 25253,
+        task1_id: "8392",
+        task1_name: "Оповестить службу доставки об обновлении тарифов",
+        task2_id: "10032",
+        task2_name: "Подготовить дополнительную упаковку для товаров по заказу #23023",
+        deal1_id: "23023",
+        deal1_name: "Заказ #23023",
+        deal2_id: 24220,
+        deal2_name: "Заказ #24220",
+        sum: "32000"
     }
 
-    /** ИНФОРМАЦИОННЫЕ ПАНЕЛИ */
-    function addCustomPanels() {
-        if ($(INFORMATION_PANEL_SELECTOR).length === 0) return;
+    //Отображаем эту информацию и стилизуем активные ссылки
+    addCode(
+        INFORMATION_PANEL_SELECTOR,
+        `<div class="info_fields">
 
-        // Кастомная панель
-        addCode(INFORMATION_PANEL_SELECTOR,
-            `<div class="info_header clearfix">
-                <p>КАСТОМНАЯ ПАНЕЛЬ</p>
-            </div>`, true);
-
-        var UserInformation = {
-            id: 25553,
-            name: 'Марк Бессонов',
-            tariff_name: 'Максимальный',
-            support_type: 'Постоянная'
-        };
-
-        addCode(INFORMATION_PANEL_SELECTOR,
-            `<div class="info_fields">
-                <h6>Логин</h6>
-                <p style="word-wrap: break-word;">#${UserInformation.id}</p>
-                <h6>Ссылка на профиль</h6>
-                <p style="word-wrap: break-word;"><a href="${URL}/id/${UserInformation.id}">${UserInformation.name}</a></p>
-                <h6>Тариф</h6>
-                <p style="word-wrap: break-word;">${UserInformation.tariff_name}</p>
-                <h6>Тип поддержки</h6>
-                <p style="word-wrap: break-word;">${UserInformation.support_type}</p>
-            </div>`, true);
-
-        // CRM панель
-        addCode(INFORMATION_PANEL_SELECTOR,
-            `<div class="info_header clearfix">
-                <p>КАСТОМНАЯ CRM</p>
-            </div>`, true);
-
-        var panelCRM = {
-            id: 25253,
-            task1_id: "8392",
-            task1_name: "Оповестить службу доставки об обновлении тарифов",
-            task2_id: "10032", 
-            task2_name: "Подготовить дополнительную упаковку для товаров по заказу #23023",
-            deal1_id: "23023",
-            deal1_name: "Заказ #23023",
-            deal2_id: 24220,
-            deal2_name: "Заказ #24220",
-            sum: "32000"
-        };
-
-        addCode(INFORMATION_PANEL_SELECTOR,
-            `<div class="info_fields">
-                <h6>Последние задачи</h6>
-                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task1_id}">${panelCRM.task1_name}</a></p>
-                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task2_id}">${panelCRM.task2_name}</a></p>
+            <h6>Последние задачи</h6>
+                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task1}"</a>${panelCRM.task1_name}</p>
+                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task2}"</a>${panelCRM.task2_name}</p>
                 <p style="word-wrap: break-word;"><a href="${URL}/createtask" style="color:#078d23; text-decoration: underline;">Создать задачу</a></p>
-                <h6>Последние сделки</h6>
+
+            <h6>Последние сделки</h6>
                 <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.deal1_id}">${panelCRM.deal1_name}</a></p>
                 <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.deal2_id}">${panelCRM.deal2_name}</a></p>
                 <p style="word-wrap: break-word;"><a href="${URL}/create_deal" style="color: #078d23; text-decoration: underline;">Создать сделку</a></p>
-                <h6>Общая сумма сделок</h6>
-                <p style="word-wrap: break-word;"><i class="fa-solid fa-circle-dollar" style="margin-right: 5px; color: #8b8b8b;"></i>${panelCRM.sum} р.</p>
-            </div>`, true);
-    }
 
-    /** СИСТЕМА БЫСТРЫХ ШАБЛОНОВ */
-    var TemplateSystem = {
-        templates: [
-            { id: 327703, name: 'Акция', color: '#e48000' },
-            { id: 179994, name: 'Реализация', color: '#00868f' },
-            { id: 163903, name: 'Каталог', color: '#ac00ae' }
-        ],
-        initialized: false,
+            <h6>Общая сумма сделок</h6>
+                <p style="word-wrap: break-word;">${panelCRM.sum} р.</p>
 
-        // Универсальная функция применения шаблона
-        applyTemplate: function(templateId) {
-            console.log('Применяем шаблон:', templateId);
-            
-            var selectors = [
-                `.apply-template[href="template_${templateId}"]`,
-                `._template_row[rel="${templateId}"]`,
-                `.template_row[rel="${templateId}"]`,
-                `li[rel="${templateId}"]`,
-                `.template-item[data-id="${templateId}"]`,
-                `[data-template-id="${templateId}"]`
-            ];
-            
-            var applied = false;
-            for (var i = 0; i < selectors.length; i++) {
-                var element = $(selectors[i]);
-                if (element.length > 0) {
-                    console.log('Найден шаблон через селектор:', selectors[i]);
-                    element.first().click();
-                    applied = true;
-                    break;
-                }
-            }
-            
-            if (!applied) {
-                console.warn('Шаблон не найден:', templateId);
-            }
-        },
+        </div>`,
+        true
+    );
 
-        // Удаление всех существующих кнопок шаблонов
-        removeExistingButtons: function() {
-            $('#emailMacroButtons, #chatMacroButtons, .template-buttons-container').remove();
-        },
+    /* БЫСТРЫЕ ШАБЛОНЫ */
 
-        // Добавление шаблонов для email с правильным размещением
-        addEmailTemplates: function() {
-            // Проверяем, не добавлены ли уже кнопки
-            if ($('.template-buttons-container').length > 0) {
-                return;
-            }
-            
-            // Ищем контейнер с иконками прикрепления файла
-            var attachWrapper = $('.text-area-box .attach-wrapper');
-            var attachFirst = $('.attach-first');
-            
-            var targetContainer = null;
-            
-            if (attachWrapper.length > 0) {
-                // Находим ссылку "Прикрепить файл" и добавляем кнопки после неё
-                var attachLink = attachWrapper.find('a').first();
-                if (attachLink.length > 0) {
-                    console.log('Добавляем email шаблоны после ссылки прикрепления');
-                    
-                    var buttonsHtml = this.templates.map(function(template) {
-                        return `<a href="#" class="template-btn" data-template-id="${template.id}" style="
-                            color: ${template.color};
-                            text-decoration: none;
-                            font-size: 11px;
-                            font-weight: 650;
-                            letter-spacing: 0.33px;
-                            cursor: pointer;
-                            margin-left: 15px;
-                        ">${template.name}</a>`;
-                    }).join('');
-                    
-                    attachLink.after(buttonsHtml);
-                    return;
-                }
-            }
-            
-            if (attachFirst.length > 0) {
-                console.log('Добавляем email шаблоны в attach-first');
-                
-                var buttonsHtml = `<div class="template-buttons-container" style="
-                    display: inline-flex; 
-                    align-items: center; 
-                    margin-left: 15px; 
-                    gap: 8px;
-                ">`;
-                
-                this.templates.forEach(function(template) {
-                    buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
-                        color: ${template.color};
-                        text-decoration: none;
-                        font-size: 11px;
-                        font-weight: 650;
-                        letter-spacing: 0.33px;
-                        cursor: pointer;
-                    ">${template.name}</a>`;
-                });
-                buttonsHtml += '</div>';
-                
-                attachFirst.append(buttonsHtml);
-            }
-        },
-
-        // Добавление шаблонов для чата
-        addChatTemplates: function() {
-            var container = $('.chat_msg_win_actions');
-            if (container.length === 0 || container.find('.template-buttons-container').length > 0) {
-                return;
-            }
-            
-            console.log('Добавляем чат шаблоны');
-            
-            // Ищем существующие иконки чата
-            var iconsContainer = container.find('ul.clearfix');
-            
-            if (iconsContainer.length > 0) {
-                // Добавляем кнопки как отдельную строку НАД иконками
-                var buttonsHtml = `<div class="template-buttons-container" style="
-                    display: block; 
-                    margin-bottom: 8px;
-                    padding-left: 0;
-                ">`;
-                
-                this.templates.forEach(function(template, index) {
-                    buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
-                        color: ${template.color};
-                        text-decoration: none;
-                        font-size: 11px;
-                        font-weight: 650;
-                        letter-spacing: 0.33px;
-                        cursor: pointer;
-                        margin-right: 15px;
-                    ">${template.name}</a>`;
-                });
-                buttonsHtml += '</div>';
-                
-                // Вставляем ПЕРЕД контейнером с иконками
-                iconsContainer.before(buttonsHtml);
-            } else {
-                // Если иконок нет, добавляем в начало контейнера
-                var buttonsHtml = `<div class="template-buttons-container" style="
-                    display: inline-flex; 
-                    align-items: center; 
-                    margin-bottom: 10px; 
-                    gap: 8px;
-                ">`;
-                
-                this.templates.forEach(function(template) {
-                    buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
-                        color: ${template.color};
-                        text-decoration: none;
-                        font-size: 11px;
-                        font-weight: 650;
-                        letter-spacing: 0.33px;
-                        cursor: pointer;
-                    ">${template.name}</a>`;
-                });
-                buttonsHtml += '</div>';
-                
-                container.prepend(buttonsHtml);
-            }
-        },
-
-        // Определение типа страницы
-        getPageType: function() {
-            if ($('.chat_msg_win_actions').length > 0) {
-                return 'chat';
-            } else if ($('.attach-first, .text-area-box').length > 0) {
-                return 'email';
-            }
-            return 'unknown';
-        },
-
-        // Инициализация с защитой от повторного вызова
-        init: function() {
-            if (this.initialized) {
-                console.log('TemplateSystem уже инициализирован');
-                return;
-            }
-            
-            var self = this;
-            var pageType = this.getPageType();
-            
-            console.log('Инициализация TemplateSystem, тип страницы:', pageType);
-            
-            // Универсальный обработчик кликов
-            $(document).off('click.templates').on('click.templates', '.template-btn', function(e) {
-                e.preventDefault();
-                var templateId = $(this).data('template-id');
-                self.applyTemplate(templateId);
-            });
-            
-            // Функция для добавления шаблонов
-            var addTemplates = function() {
-                self.removeExistingButtons(); // Удаляем существующие кнопки
-                
-                if (pageType === 'email') {
-                    self.addEmailTemplates();
-                } else if (pageType === 'chat') {
-                    self.addChatTemplates();
-                }
-            };
-            
-            // Добавляем шаблоны с несколькими попытками
-            setTimeout(addTemplates, 500);
-            setTimeout(addTemplates, 1000);
-            setTimeout(addTemplates, 2000);
-            
-            this.initialized = true;
-        }
+    // По клику находим ID шаблона, и применяем его, подставляя ID
+    var handleMacroClick = function(templateId) {
+        $(document).on('click', `#applyMacroButton_${templateId}`, function(e) {
+            e.preventDefault();
+            // Применяем шаблон по клику на ссылку
+            $(`.apply-template[href="template_${templateId}"]`).click();
+        });
     };
 
-    /** КАЛЬКУЛЯТОР СТОИМОСТИ ДОСТАВКИ */
-    function initializeCalculator() {
-        if ($(INTEGRATION_PANEL_SELECTOR).length === 0) return;
+    // Выносим ссылки для быстрого применения шаблона и стилизуем их
+    var addButton = function(containerSelector, templateId, buttonText, styles) {
+        var buttonId = `applyMacroButton_${templateId}`;
+        var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
+        addCode(containerSelector, buttonHtml, true);
+        handleMacroClick(templateId);
+        applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID
+    };
 
-        addCode(INTEGRATION_PANEL_SELECTOR,
-            `<div class="info_header clearfix">
-                <p>Калькулятор стоимости доставки</p>
-            </div>`, true);
+    // Создаем функцию для стилизации ссылок
+    var applyStyles = function(selector, styles) {
+        $(selector).css(styles);
+    };
 
-        var calculatorHTML = `
-            <div id="complexCalculator" style="margin-bottom: 20px;">
-                <div style="margin-bottom: 10px;">
-                    <label for="calc_weight" style="margin-right: 5px;">Вес <span style="color: #000000; font-weight: 600; font-size: 12px;">(кг)</span></label>
-                    <input type="number" id="calc_weight" placeholder="Введите вес" style="right: 23px; position: absolute;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label for="calc_height" style="margin-right: 5px;">Высота <span style="color: #000000; font-weight: 600; font-size: 12px;">(см)</span></label>
-                    <input type="number" id="calc_height" placeholder="Введите высоту" style="right: 23px; position: absolute;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label for="calc_width" style="margin-right: 5px;">Ширина <span style="color: #000000; font-weight: 600; font-size: 12px;">(см)</span></label>
-                    <input type="number" id="calc_width" placeholder="Введите ширину" style="right: 23px; position: absolute;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label for="calc_length" style="margin-right: 5px;">Длина <span style="color: #000000; font-weight: 600; font-size: 12px;">(см)</span></label>
-                    <input type="number" id="calc_length" placeholder="Введите длину" style="right: 23px; position: absolute;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label for="calc_distance" style="margin-right: 5px;">Дистанция <span style="color: #000000; font-weight: 600; font-size: 12px;">(км)</span></label>
-                    <input type="number" id="calc_distance" placeholder="Введите дистанцию" style="right: 23px; position: absolute;">
-                </div>
-                <div style="margin-top: 15px; display: flex; justify-content: space-between;">
-                    <button id="refreshCalcBtn" style="padding: 8px 11px 7px 11px; background: #558ffd; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 0.4px; margin-left: -3px;">ОБНОВИТЬ</button>
-                    <button id="calculateBtn" style="position: absolute; right: 23px; padding: 8px 10px 7px 10px; background: #29ab30; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 1.1px; width: 154px;">ПОДСЧИТАТЬ</button>
-                </div>
-                <p style="font-weight: bold; font-size: 14px; color: #000000; margin-top: 15px;">
-                    Результат: <span id="calcResult" style="font-weight: bold; font-size: 14px; color: #29ab30;"></span>
-                </p>
-            </div>`;
+    // Функция для добавления шаблонов
+    function addTemplateButtons() {
+        console.log('Добавляем кнопки шаблонов...');
 
-        $(INTEGRATION_PANEL_SELECTOR).append(calculatorHTML);
+        // Ищем контейнеры для разных типов страниц
+        var emailContainer = $('.attach-first');  // Для email обращений
+        var chatContainer = $('.chat_msg_win_actions'); // Для чатов
 
-        // Обработчики кнопок калькулятора
-        $(document).on('click', '#calculateBtn', function() {
-            var weight = parseFloat($('#calc_weight').val()) || 0;
-            var height = parseFloat($('#calc_height').val()) || 0;
-            var width = parseFloat($('#calc_width').val()) || 0;
-            var length = parseFloat($('#calc_length').val()) || 0;
-            var distance = parseFloat($('#calc_distance').val()) || 0;
+        // Для EMAIL обращений
+        if (emailContainer.length > 0 && $('#macroButtonsContainer').length === 0) {
+            console.log('Найден email контейнер, добавляем шаблоны');
 
-            var weightCost = 0;
-            if (weight <= 2) {
-                weightCost = 0;
-            } else if (weight <= 5) {
-                weightCost = 20;
-            } else if (weight <= 10) {
-                weightCost = 50;
-            } else {
-                weightCost = 20 * weight + 50;
+            addCode(
+                '.attach-first',
+                '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
+                true
+            );
+
+            var templateSelector = '#macroButtonsContainer';
+
+            addButton(templateSelector, 327703, 'Акция', {
+                'color': '#e48000',
+                'text-decoration': 'none',
+                'margin-right': '10px',
+                'font-size': '11px',
+                'font-weight': '650',
+                'letter-spacing': '0.33px'
+            });
+
+            addButton(templateSelector, 179994, 'Реализация', {
+                'color': '#00868f',
+                'text-decoration': 'none',
+                'margin-right': '10px',
+                'font-size': '11px',
+                'font-weight': '650',
+                'letter-spacing': '0.33px'
+            });
+
+            addButton(templateSelector, 163903, 'Каталог', {
+                'color': '#ac00ae',
+                'text-decoration': 'none',
+                'margin-right': '10px',
+                'font-size': '11px',
+                'font-weight': '650',
+                'letter-spacing': '0.33px'
+            });
+
+            console.log('✓ Email шаблоны добавлены');
+        }
+
+        // Для ЧАТОВ - добавляем рядом с иконками, как для email
+        if (chatContainer.length > 0 && $('#chatMacroButtonsContainer').length === 0) {
+            console.log('Найден чат контейнер, добавляем шаблоны');
+
+            // Находим ul.clearfix с иконками
+            var chatIconsList = chatContainer.find('ul.clearfix');
+            if (chatIconsList.length > 0) {
+                // Добавляем контейнер для шаблонов ПОСЛЕ ul.clearfix
+                chatIconsList.after('<div id="chatMacroButtonsContainer" style="display: inline-block; margin-left: 15px; vertical-align: top; margin-top: 8px;"></div>');
+
+                // Добавляем кнопки в контейнер
+                $('#chatMacroButtonsContainer').append(`
+                    <a id="applyChatMacroButton_327703" href="#" style="
+                        color: #e48000;
+                        text-decoration: none;
+                        margin-right: 10px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                    ">Акция</a>
+                    <a id="applyChatMacroButton_179994" href="#" style="
+                        color: #00868f;
+                        text-decoration: none;
+                        margin-right: 10px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                    ">Реализация</a>
+                    <a id="applyChatMacroButton_163903" href="#" style="
+                        color: #ac00ae;
+                        text-decoration: none;
+                        margin-right: 10px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                    ">Каталог</a>
+                `);
             }
 
-            var volume = (height * width * length) / 1000000;
-            var volumeCost = 0;
-            if (volume > 500) {
-                volumeCost = volume * 1 + 100;
-            } else if (volume > 300) {
-                volumeCost = 100;
-            }
+            // Обработчики кликов для чата
+            $(document).on('click', '#applyChatMacroButton_327703', function(e) {
+                e.preventDefault();
+                console.log('Клик по шаблону 327703 (Акция)');
 
-            var distanceCost = distance;
-            var totalCost = weightCost + volumeCost + distanceCost;
+                // Пробуем разные варианты применения шаблона в чате
+                var template1 = $(`.apply-template[href="template_327703"]`);
+                var template2 = $(`.apply-template[data-template-id="327703"]`);
+                var template3 = $(`.template-item[data-id="327703"]`);
+                var template4 = $(`.template_row[rel="327703"]`);
+                var template5 = $(`._template_row[rel="327703"]`);
+                var template6 = $(`li[rel="327703"]`);
 
-            $('#calcResult').text(totalCost.toFixed(2) + ' рублей');
-        });
+                console.log('Поиск шаблонов:');
+                console.log('template_327703:', template1.length);
+                console.log('data-template-id:', template2.length);
+                console.log('template-item:', template3.length);
+                console.log('template_row[rel]:', template4.length);
+                console.log('_template_row[rel]:', template5.length);
+                console.log('li[rel]:', template6.length);
 
-        $(document).on('click', '#refreshCalcBtn', function() {
-            $('#calc_weight, #calc_height, #calc_width, #calc_length, #calc_distance').val('');
-            $('#calcResult').text('');
-        });
+                // Пробуем применить найденный шаблон
+                if (template1.length > 0) {
+                    console.log('Применяем через .apply-template[href]');
+                    template1.click();
+                } else if (template5.length > 0) {
+                    console.log('Применяем через ._template_row[rel]');
+                    template5.click();
+                } else if (template6.length > 0) {
+                    console.log('Применяем через li[rel]');
+                    template6.click();
+                } else {
+                    console.log('Шаблон с ID 327703 не найден. Ищем все возможные селекторы...');
+                    console.log('Все .apply-template:', $('.apply-template').length);
+                    console.log('Все ._template_row:', $('._template_row').length);
+                    console.log('Все [rel]:', $('[rel]').length);
+
+                    // Выводим первые несколько найденных элементов для анализа
+                    $('._template_row').slice(0, 3).each(function(i, el) {
+                        console.log('_template_row ' + i + ':', $(el).attr('rel'), $(el).text().trim());
+                    });
+                }
+            });
+
+            $(document).on('click', '#applyChatMacroButton_179994', function(e) {
+                e.preventDefault();
+                console.log('Клик по шаблону 179994 (Реализация)');
+
+                var template = $(`._template_row[rel="179994"]`);
+                if (template.length > 0) {
+                    template.click();
+                } else {
+                    $(`.apply-template[href="template_179994"]`).click();
+                }
+            });
+
+            $(document).on('click', '#applyChatMacroButton_163903', function(e) {
+                e.preventDefault();
+                console.log('Клик по шаблону 163903 (Каталог)');
+
+                var template = $(`._template_row[rel="163903"]`);
+                if (template.length > 0) {
+                    template.click();
+                } else {
+                    $(`.apply-template[href="template_163903"]`).click();
+                }
+            });
+
+            console.log('✓ Чат шаблоны добавлены');
+        }
     }
 
-    /** ИНИЦИАЛИЗАЦИЯ */
+    // Запускаем добавление шаблонов с задержкой
     $(document).ready(function() {
-        console.log('Инициализация кастомизации Omnidesk...');
-        
-        // Добавляем стили
-        addGlobalStyles();
-        
-        // Инициализируем основной интерфейс
-        setTimeout(function() {
-            initializeInterface();
-            addCustomPanels();
-            initializeCalculator();
-            TemplateSystem.init();
-            console.log('✓ Кастомизация завершена');
-        }, 500);
+        setTimeout(addTemplateButtons, 800); // Увеличил задержку для чатов
     });
+
+    /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
+
+    // Сначала добавляем название блока
+    addCode(
+        INTEGRATION_PANEL_SELECTOR,
+        `<div class="info_header clearfix">
+            <p>Калькулятор стоимости доставки</p> </div>`,
+        true
+    );
+
+    // Создаем селектор и его HTML-верстку
+    var addComplexCalculator = function(containerSelector) {
+        var calculatorHTML =
+
+        `<div id="complexCalculator" style="margin-bottom: 20px;">
+            <div style="margin-bottom: 10px;">
+                <label for="weight" style="margin-right: 5px;">Вес
+                    <span style="color: #000000; font-weight: 600; font-size: 12px;">(кг)</span>
+                </label>
+                <input type="number" id="weight" placeholder="Введите вес" style="right: 23px; position: absolute;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label for="height" style="margin-right: 5px;">Высота
+                    <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
+                </label>
+                <input type="number" id="height" placeholder="Введите высоту" style="right: 23px; position: absolute;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label for="width" style="margin-right: 5px;">Ширина
+                    <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
+                </label>
+                <input type="number" id="width" placeholder="Введите ширину" style="right: 23px; position: absolute;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label for="length" style="margin-right: 5px;">Длина
+                    <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
+                </label>
+                <input type="number" id="length" placeholder="Введите длину" style="right: 23px; position: absolute;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label for="distance" style="margin-right: 5px;">Дистанция
+                    <span style="color: #000000; font-weight: 600; font-size: 12px;">(км)</span>
+                </label>
+                <input type="number" id="distance" placeholder="Введите дистанцию" style="right: 23px; position: absolute;">
+            </div>
+
+            <div id="buttonsContainer" style="margin-top: 15px; display: flex; justify-content: space-between;">
+
+                <button id="refreshBtn" style="padding: 8px 11px 7px 11px; background: #558ffd; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 0.4px; margin-left: -3px;">
+                    ОБНОВИТЬ
+                </button>
+
+                <button id="calculateBtn" style="position: absolute; right: 23px; padding: 8px 10px 7px 10px; background: #29ab30; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 1.1px; width: 154px">
+                    ПОДСЧИТАТЬ
+                </button>
+
+            </div>
+
+            <p id="resultLabel" style="font-weight: bold; font-size: 14px; color: #000000; margin-top: 15px;">
+                Результат:
+                    <span id="resultValue" style="font-weight: bold; font-size: 14px; color: #29ab30; right: 5px;"></span>
+            </p>
+        </div> `;
+
+        // При запуске функции containerSelector показываем верстку блока
+        $(containerSelector).append(calculatorHTML);
+
+        // по клику на кнопку калькулятора «Подсчитать» запускаем функцию подсчёта
+        $(containerSelector).on('click', '#calculateBtn', function() {
+            calculateCost();
+        });
+
+        // По клику по кнопке калькулятора «Обновить» очищаем все поля
+        $(containerSelector).on('click', '#refreshBtn', function() {
+            $('#weight, #height, #width, #length, #distance').val('');
+            $('#resultValue').text('');
+        });
+    };
+
+
+    // Функция подсчёта стоимости
+    var calculateCost = function() {
+
+        var weight = parseFloat($('#weight').val()) || 0;
+        var height = parseFloat($('#height').val()) || 0;
+        var width = parseFloat($('#width').val()) || 0;
+        var length = parseFloat($('#length').val()) || 0;
+        var distance = parseFloat($('#distance').val()) || 0;
+
+        // Подсчёт стоимости по весу
+        var weightCost = 0;
+
+        if (weight <= 2) {
+            weightCost = 0;
+        } else if (weight <= 5) {
+            weightCost = 20;
+        } else if (weight <= 10) {
+            weightCost = 50;
+        } else {
+            weightCost = 20 * weight + 50;
+        }
+
+        // Подсчёт объёма
+        var volume = (height * width * length) / 1000000; // конвертируем см3 в м3
+
+        // Подсчёт стоимости по объёму
+        var volumeCost = 0; if (volume > 500) {
+            volumeCost = volume * 1 + 100;
+        } else if (volume > 300) {
+            volumeCost = 100;
+        }
+
+        // Подсчёт стоимости по дистанции
+        var distanceCost = distance;
+
+        // Подсчёт общей стоимости
+        var totalCost = weightCost + volumeCost + distanceCost;
+
+        // Отображаем результат в рублях
+        $('#resultValue').text(totalCost.toFixed(2) + ' рублей');
+
+    };
+
+    // Добавляем блок с калькулятором в панель интеграций после загрузки элементов страницы
+    $(document).ready(function() {
+        addComplexCalculator('#integrations_info_panel');
+    });
+
 });
