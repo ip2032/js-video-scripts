@@ -269,7 +269,7 @@ $(function() {
     if ($('#macroButtonsContainer').length === 0) {
         addCode(
             buttonContainerSelector, 
-            '<div id="macroButtonsContainer" style="margin-top: 10px;"></div>',
+            '<div id="macroButtonsContainer" style="margin-top: 10px; display: inline-flex; gap: 8px; margin-left: 10px;"></div>',
             true
         );
     }
@@ -284,7 +284,6 @@ $(function() {
     addButton(templateSelector, 210005, 'Акция 22', { 
         'color': '#e48000',
         'text-decoration': 'none',
-        'margin-left': '30px',
         'font-size': '11px',
         'font-weight': '650',
         'letter-spacing': '0.33px' 
@@ -293,7 +292,6 @@ $(function() {
     addButton(templateSelector, 179994, 'Реализация', {
         'color': '#00868f',
         'text-decoration': 'none',
-        'margin-left': '5px',
         'font-size': '11px',
         'font-weight': '650',
         'letter-spacing': '0.33px' 
@@ -302,7 +300,6 @@ $(function() {
     addButton(templateSelector, 163903, 'Каталог', {
         'color': '#ac00ae', 
         'text-decoration': 'none',
-        'margin-left': '5px', 
         'font-size': '11px', 
         'font-weight': '650',
         'letter-spacing': '0.33px' 
