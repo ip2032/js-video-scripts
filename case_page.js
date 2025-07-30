@@ -48,20 +48,18 @@ $(function() {
                     align-items: center !important;
                     flex-wrap: nowrap !important;
                 }
-                .macro-buttons-container {
+                #emailMacroButtons, #chatMacroButtons {
                     display: inline-flex !important;
                     align-items: center !important;
-                    vertical-align: middle !important;
                     gap: 8px !important;
-                    margin-left: 15px !important;
                 }
                 .macro-button {
                     text-decoration: none !important;
                     font-size: 11px !important;
                     font-weight: 650 !important;
                     letter-spacing: 0.33px !important;
-                    margin-right: 10px !important;
                     cursor: pointer !important;
+                    margin-right: 0 !important;
                 }
                 .macro-button:hover {
                     opacity: 0.7 !important;
@@ -231,13 +229,23 @@ $(function() {
                        style="color: ${template.color};">${template.name}</a>`;
         },
 
+        // Определение типа страницы
+        getPageType: function() {
+            if ($('.chat_msg_win_actions').length > 0) {
+                return 'chat';
+            } else if ($('.attach-first').length > 0) {
+                return 'email';
+            }
+            return 'unknown';
+        },
+
         // Добавление шаблонов для email
         addEmailTemplates: function() {
             var container = $('.attach-first');
             if (container.length === 0 || $('#emailMacroButtons').length > 0) return;
             
             console.log('Добавляем email шаблоны');
-            var buttonsHtml = '<div id="emailMacroButtons" class="macro-buttons-container">';
+            var buttonsHtml = '<div id="emailMacroButtons" style="display: inline-flex; align-items: center; margin-left: 15px; gap: 8px;">';
             
             this.templates.forEach(function(template) {
                 buttonsHtml += TemplateSystem.createButton(template);
@@ -253,14 +261,14 @@ $(function() {
             if (container.length === 0 || $('#chatMacroButtons').length > 0) return;
             
             console.log('Добавляем чат шаблоны');
-            var buttonsHtml = '<div id="chatMacroButtons" style="display: inline-block; margin-left: 15px; vertical-align: top; margin-top: 5px;">';
+            var buttonsHtml = '<div id="chatMacroButtons" style="display: inline-flex; align-items: center; margin-left: 15px; margin-top: 8px; gap: 8px;">';
             
             this.templates.forEach(function(template) {
                 buttonsHtml += TemplateSystem.createButton(template);
             });
             buttonsHtml += '</div>';
             
-            // Пробуем разные варианты размещения для чатов
+            // Размещаем после панели с иконками
             var targetContainer = container.find('ul.clearfix');
             if (targetContainer.length > 0) {
                 targetContainer.after(buttonsHtml);
@@ -272,6 +280,9 @@ $(function() {
         // Инициализация системы шаблонов
         init: function() {
             var self = this;
+            var pageType = this.getPageType();
+            
+            console.log('Тип страницы:', pageType);
             
             // Универсальный обработчик кликов
             $(document).on('click', '.template-btn', function(e) {
@@ -280,14 +291,14 @@ $(function() {
                 self.applyTemplate(templateId);
             });
             
-            // Добавляем шаблоны с задержкой для разных типов страниц
+            // Добавляем шаблоны только для соответствующего типа страницы
             setTimeout(function() {
-                self.addEmailTemplates();
-            }, 800);
-            
-            setTimeout(function() {
-                self.addChatTemplates();
-            }, 1200);
+                if (pageType === 'email') {
+                    self.addEmailTemplates();
+                } else if (pageType === 'chat') {
+                    self.addChatTemplates();
+                }
+            }, 1000);
         }
     };
 
