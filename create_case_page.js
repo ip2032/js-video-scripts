@@ -36,6 +36,7 @@ $(function() {
         return (typeof data === 'undefined') ? false : true;
     }
 
+
     /**
      * Вставка в конец или в начало элемента
      */
@@ -49,12 +50,30 @@ $(function() {
         }
     };
 
+    // CSS для выравнивания кнопок шаблонов с "Прикрепить файл"
+    $(document).ready(function() {
+        $('<style>').prop('type', 'text/css').html(`
+            .attach-first {
+                display: flex !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important;
+            }
+            #macroButtonsContainer {
+                display: inline-flex !important;
+                align-items: center !important;
+                vertical-align: middle !important;
+                gap: 8px !important;
+            }
+        `).appendTo('head');
+    });
+
     /** EXAMPLES */
 
     // Отключаем возможность менять значение кастомного поля «Статус заказа»
     $(document).ready(function() {
         $('select[name="field_7608"]').prop('disabled', true).trigger('chosen:updated');
     });
+
 
     // Меняем стили для адреса электронной почты в поле «Отправить с»
     $(document).ready(function() {
@@ -72,12 +91,13 @@ $(function() {
 
         container.find('.chosen-single').css({
             'color': '#1441e0',
-            'font-weight' : '700',
+            'font-weight' : '700',    
             'background': '#f6e6e6',
             'border-color': '#dadada',
             'box-shadow': '0 0 3px #f6e6e6 inset, 0 1px 1px rgba(0,0,0,.1)'
    	    });
-    });
+    });    
+
 
     // Добавляем новый раздел «Веб-сайт» в шапке страницы
     addCode(
@@ -97,7 +117,7 @@ $(function() {
             </a>
         </li>`,
         false
-    );
+    );	
 
     // Добавляем новую иконку в шапке справа в стили Омнидеска
     addCode(
@@ -119,13 +139,15 @@ $(function() {
         'border-bottom': 'solid 3px #44BE69',
     });
 
+
     /**
      * Подключаем свой CSS в код Омнидеска. В CSS дополнительные иконки
      * Результат на странице https://www.dropbox.com/s/jde5uaykf84hsak/05_custom_css.png?dl=0
      */
     $(document)
         .find('body')
-        .append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css">');
+        .append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css">');    
+
 
          /**
      * Добавляем кастомную информацию в блок о пользователе
@@ -139,6 +161,7 @@ $(function() {
         </div>`,
         true
     );
+
 
     /**
      * Потом информация
@@ -176,6 +199,7 @@ $(function() {
         </div>`,
         true
     );
+        
 
     // Добавляем заголовок для кастомной CRM
     addCode(
@@ -185,7 +209,7 @@ $(function() {
         </div>`,
         true
     );
-
+    
     /**
      * Добавляем информацию
      *
@@ -194,7 +218,7 @@ $(function() {
      *
      * и получили такой объект в callback:
      */
-
+ 
     var panelCRM = {
         id: 25253,
         task1_id: "8392",
@@ -205,7 +229,7 @@ $(function() {
         deal1_name: "Заказ #23023",
         deal2_id: 24220,
         deal2_name: "Заказ #24220",
-        sum: "32000"
+        sum: "32000"	
     }
 
     //Отображаем эту информацию и стилизуем активные ссылки
@@ -235,7 +259,7 @@ $(function() {
     var handleMacroClick = function(templateId) {
         $(document).on('click', `#applyMacroButton_${templateId}`, function(e) {
             e.preventDefault();
-            // Применяем шаблон по клику на ссылку
+            // Применяем шаблон по клику на ссылку  
             $(`.apply-template[href="template_${templateId}"]`).click();
         });
     };
@@ -246,7 +270,7 @@ $(function() {
         var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
         addCode(containerSelector, buttonHtml, true);
         handleMacroClick(templateId);
-        applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID
+        applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID 
     };
 
     // Создаем функцию для стилизации ссылок
@@ -254,186 +278,120 @@ $(function() {
         $(selector).css(styles);
     };
 
-// ИЗМЕНЕНО: Создаем селектор для блока, в который добавим ссылки - теперь в тот же блок, что и "Прикрепить файл"
-var buttonContainerSelector = '.attach-first';
+    // Создаем селектор для блока, в который добавим ссылки - теперь в тот же блок, что и "Прикрепить файл"
+    var buttonContainerSelector = '.attach-first';
 
-// Проверяем, если кастомная ссылка на шаблон уже есть на странице, если нет, то добавляем
-if ($('#macroButtonsContainer').length === 0) {
-    addCode(
-        buttonContainerSelector,
-        '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
-        true
-    );
-}
-
-// Добавляем селектор для созданного блока ссылок
-var templateSelector = '#macroButtonsContainer';
-
-// Очищаем существующие данные, чтобы добавить определенные шаблоны
-$('#macroButtonsContainer').empty();
-
-// ИЗМЕНЕНО: Добавляем новые ссылки для применения шаблона и стилизуем их - изменили отступы
-addButton(templateSelector, 210005, 'Акция 22', {
-    'color': '#e48000',
-    'text-decoration': 'none',
-    'margin-right': '10px',
-    'font-size': '11px',
-    'font-weight': '650',
-    'letter-spacing': '0.33px'
-});
-
-addButton(templateSelector, 179994, 'Реализация', {
-    'color': '#00868f',
-    'text-decoration': 'none',
-    'margin-right': '10px',
-    'font-size': '11px',
-    'font-weight': '650',
-    'letter-spacing': '0.33px'
-});
-
-addButton(templateSelector, 163903, 'Каталог', {
-    'color': '#ac00ae',
-    'text-decoration': 'none',
-    'margin-right': '10px',
-    'font-size': '11px',
-    'font-weight': '650',
-    'letter-spacing': '0.33px'
-});
-
-/* БЫСТРЫЕ ШАБЛОНЫ ДЛЯ ЧАТОВ */
-
-// Селектор для чатов - добавляем после ul с кнопками
-var chatContainerSelector = '.answer-action-box ul.clearfix.fl-left';
-
-// Проверяем, что мы на странице чата и есть нужный контейнер
-if ($(chatContainerSelector).length > 0) {
-
-    // Проверяем, если кастомный блок шаблонов для чата уже есть
-    if ($('#chatMacroButtonsContainer').length === 0) {
-        // Добавляем контейнер для шаблонов после ul с кнопками
-        $(chatContainerSelector).after('<div id="chatMacroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 10px;"></div>');
+    // Проверяем, если кастомная ссылка на шаблон уже есть на странице, если нет, то добавляем
+    if ($('#macroButtonsContainer').length === 0) {
+        addCode(
+            buttonContainerSelector, 
+            '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
+            true
+        );
     }
 
-    // Очищаем существующие данные
-    $('#chatMacroButtonsContainer').empty();
+    // Добавляем селектор для созданного блока ссылок
+    var templateSelector = '#macroButtonsContainer';
 
-    // Добавляем простые текстовые ссылки (как в email-обращениях)
-    $('#chatMacroButtonsContainer').append(`
-        <a id="applyChatMacroButton_210005" href="#" style="
-            color: #e48000;
-            text-decoration: none;
-            margin-right: 10px;
-            font-size: 11px;
-            font-weight: 650;
-            letter-spacing: 0.33px;
-        ">Акция 22</a>
-    `);
+    // Очищаем существующие данные, чтобы добавить определенные шаблоны
+    $('#macroButtonsContainer').empty();
 
-    $('#chatMacroButtonsContainer').append(`
-        <a id="applyChatMacroButton_179994" href="#" style="
-            color: #00868f;
-            text-decoration: none;
-            margin-right: 10px;
-            font-size: 11px;
-            font-weight: 650;
-            letter-spacing: 0.33px;
-        ">Реализация</a>
-    `);
-
-    $('#chatMacroButtonsContainer').append(`
-        <a id="applyChatMacroButton_163903" href="#" style="
-            color: #ac00ae;
-            text-decoration: none;
-            margin-right: 10px;
-            font-size: 11px;
-            font-weight: 650;
-            letter-spacing: 0.33px;
-        ">Каталог</a>
-    `);
-
-    // Обработчики кликов для чата
-    $(document).on('click', '#applyChatMacroButton_210005', function(e) {
-        e.preventDefault();
-        $(`.apply-template[href="template_210005"]`).click();
+    // Добавляем новые ссылки для применения шаблона и стилизуем их с обновленными ID
+    addButton(templateSelector, 327703, 'Акция', { 
+        'color': '#e48000',
+        'text-decoration': 'none',
+        'margin-right': '10px',
+        'font-size': '11px',
+        'font-weight': '650',
+        'letter-spacing': '0.33px' 
+    });
+    
+    addButton(templateSelector, 328169, 'Реализация', {
+        'color': '#00868f',
+        'text-decoration': 'none',
+        'margin-right': '10px',
+        'font-size': '11px',
+        'font-weight': '650',
+        'letter-spacing': '0.33px' 
     });
 
-    $(document).on('click', '#applyChatMacroButton_179994', function(e) {
-        e.preventDefault();
-        $(`.apply-template[href="template_179994"]`).click();
+    addButton(templateSelector, 328170, 'Каталог', {
+        'color': '#ac00ae', 
+        'text-decoration': 'none',
+        'margin-right': '10px', 
+        'font-size': '11px', 
+        'font-weight': '650',
+        'letter-spacing': '0.33px' 
     });
 
-    $(document).on('click', '#applyChatMacroButton_163903', function(e) {
-        e.preventDefault();
-        $(`.apply-template[href="template_163903"]`).click();
-    });
-}
+
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
 
     // Сначала добавляем название блока
-    addCode(
-        INTEGRATION_PANEL_SELECTOR,
+    addCode( 
+        INTEGRATION_PANEL_SELECTOR, 
         `<div class="info_header clearfix">
             <p>Калькулятор стоимости доставки</p> </div>`,
-        true
+        true 
     );
-
-    // Создаем селектор и его HTML-верстку
-    var addComplexCalculator = function(containerSelector) {
-        var calculatorHTML =
+    
+    // Создаем селектор и его HTML-верстку 
+    var addComplexCalculator = function(containerSelector) { 
+        var calculatorHTML = 
 
         `<div id="complexCalculator" style="margin-bottom: 20px;">
-            <div style="margin-bottom: 10px;">
-                <label for="weight" style="margin-right: 5px;">Вес
+            <div style="margin-bottom: 10px;"> 
+                <label for="weight" style="margin-right: 5px;">Вес 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(кг)</span>
-                </label>
+                </label> 
                 <input type="number" id="weight" placeholder="Введите вес" style="right: 23px; position: absolute;">
             </div>
-
-            <div style="margin-bottom: 10px;">
-                <label for="height" style="margin-right: 5px;">Высота
+            
+            <div style="margin-bottom: 10px;"> 
+                <label for="height" style="margin-right: 5px;">Высота 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
-                </label>
+                </label> 
                 <input type="number" id="height" placeholder="Введите высоту" style="right: 23px; position: absolute;">
-            </div>
-
-            <div style="margin-bottom: 10px;">
-                <label for="width" style="margin-right: 5px;">Ширина
+            </div> 
+            
+            <div style="margin-bottom: 10px;"> 
+                <label for="width" style="margin-right: 5px;">Ширина 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
-                </label>
+                </label> 
                 <input type="number" id="width" placeholder="Введите ширину" style="right: 23px; position: absolute;">
-            </div>
-
+            </div> 
+            
             <div style="margin-bottom: 10px;">
-                <label for="length" style="margin-right: 5px;">Длина
+                <label for="length" style="margin-right: 5px;">Длина 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
                 </label>
                 <input type="number" id="length" placeholder="Введите длину" style="right: 23px; position: absolute;">
-            </div>
-
-            <div style="margin-bottom: 10px;">
-                <label for="distance" style="margin-right: 5px;">Дистанция
+            </div> 
+            
+            <div style="margin-bottom: 10px;"> 
+                <label for="distance" style="margin-right: 5px;">Дистанция 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(км)</span>
                 </label>
                 <input type="number" id="distance" placeholder="Введите дистанцию" style="right: 23px; position: absolute;">
-            </div>
-
-            <div id="buttonsContainer" style="margin-top: 15px; display: flex; justify-content: space-between;">
-
+            </div> 
+            
+            <div id="buttonsContainer" style="margin-top: 15px; display: flex; justify-content: space-between;"> 
+                            
                 <button id="refreshBtn" style="padding: 8px 10px 7px 10px; background: #558ffd; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 0.4px; margin-left: -3px;">
                     ОБНОВИТЬ
                 </button>
 
                 <button id="calculateBtn" style="position: absolute; right: 23px; padding: 8px 11px 7px 11px; background: #29ab30; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 1.1px; width: 154px">
                     ПОДСЧИТАТЬ
-                </button>
-
-            </div>
-
+                </button> 
+            
+            </div> 
+            
             <p id="resultLabel" style="font-weight: bold; font-size: 14px; color: #000000; margin-top: 15px;">
-                Результат:
-                    <span id="resultValue" style="font-weight: bold; font-size: 14px; color: #29ab30; right: 5px;"></span>
-            </p>
-        </div> `;
+                Результат: 
+                    <span id="resultValue" style="font-weight: bold; font-size: 14px; color: #29ab30; right: 5px;"></span> 
+            </p>                     
+        </div> `; 
 
         // При запуске функции containerSelector показываем верстку блока
         $(containerSelector).append(calculatorHTML);
@@ -445,23 +403,24 @@ if ($(chatContainerSelector).length > 0) {
 
         // По клику по кнопке калькулятора «Обновить» очищаем все поля
         $(containerSelector).on('click', '#refreshBtn', function() {
-            $('#weight, #height, #width, #length, #distance').val('');
+            $('#weight, #height, #width, #length, #distance').val(''); 
             $('#resultValue').text('');
         });
     };
 
+
     // Функция подсчёта стоимости
-    var calculateCost = function() {
-
-        var weight = parseFloat($('#weight').val()) || 0;
-        var height = parseFloat($('#height').val()) || 0;
-        var width = parseFloat($('#width').val()) || 0;
-        var length = parseFloat($('#length').val()) || 0;
+    var calculateCost = function() { 
+    
+        var weight = parseFloat($('#weight').val()) || 0; 
+        var height = parseFloat($('#height').val()) || 0; 
+        var width = parseFloat($('#width').val()) || 0; 
+        var length = parseFloat($('#length').val()) || 0; 
         var distance = parseFloat($('#distance').val()) || 0;
-
+    
         // Подсчёт стоимости по весу
-        var weightCost = 0;
-
+        var weightCost = 0; 
+        
         if (weight <= 2) {
             weightCost = 0;
         } else if (weight <= 5) {
@@ -471,31 +430,31 @@ if ($(chatContainerSelector).length > 0) {
         } else {
             weightCost = 20 * weight + 50;
         }
-
+        
         // Подсчёт объёма
         var volume = (height * width * length) / 1000000; // конвертируем см3 в м3
-
+    
         // Подсчёт стоимости по объёму
-        var volumeCost = 0; if (volume > 500) {
+        var volumeCost = 0; if (volume > 500) { 
             volumeCost = volume * 1 + 100;
         } else if (volume > 300) {
             volumeCost = 100;
         }
-
+        
         // Подсчёт стоимости по дистанции
         var distanceCost = distance;
-
+        
         // Подсчёт общей стоимости
         var totalCost = weightCost + volumeCost + distanceCost;
-
+    
         // Отображаем результат в рублях
         $('#resultValue').text(totalCost.toFixed(2) + ' рублей');
-
+        
     };
-
+    
     // Добавляем блок с калькулятором в панель интеграций после загрузки элементов страницы
-    $(document).ready(function() {
+    $(document).ready(function() {    
         addComplexCalculator('#integrations_info_panel');
     });
-
+    
 });

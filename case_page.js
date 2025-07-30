@@ -1,21 +1,10 @@
-// ==UserScript==
-// @name         case_page.js
-// @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Test script for Omnidesk templates with chat support
-// @author       You
-// @match        https://st.omnidesk.ru/staff/cases/record*
-// @match        https://st.omnidesk.ru/staff/cases/chat/*
-// @grant        none
-// ==/UserScript==
-
 $(function() {
     /**
      * Ваш сайт, для примеров работы с запросами
      */
-
+    
     var URL = 'https://omnidesk.ru';
-
+    
     /**
      * Некоторые переменные, доступные в глобальной видимости Омнидеска:
      * CurrentCaseId
@@ -62,19 +51,28 @@ $(function() {
         }
     };
 
-    // CSS для выравнивания кнопок шаблонов с "Прикрепить файл"
+    // CSS для выравнивания кнопок шаблонов
     $(document).ready(function() {
         $('<style>').prop('type', 'text/css').html(`
-            .attach-first {
+            .text-area-box .attach-wrapper {
                 display: flex !important;
                 align-items: center !important;
-                flex-wrap: nowrap !important;
+                flex-wrap: wrap !important;
             }
             #macroButtonsContainer {
                 display: inline-flex !important;
                 align-items: center !important;
                 vertical-align: middle !important;
                 gap: 8px !important;
+                margin-left: 15px !important;
+            }
+            #chatMacroButtonsContainer {
+                display: inline-flex !important;
+                align-items: center !important;
+                vertical-align: middle !important;
+                gap: 8px !important;
+                margin-left: 15px !important;
+                margin-top: 8px !important;
             }
         `).appendTo('head');
     });
@@ -124,7 +122,7 @@ $(function() {
             </a>
         </li>`,
         false
-    );
+    );	
 
     // Добавляем новую иконку в шапке справа в стили Омнидеска
     addCode(
@@ -136,7 +134,7 @@ $(function() {
         </li>`,
         false
     );
-
+	
     /**
      * Добавляем в горизонтальное меню цвета своей компании
      * Результат в коде Омнидеска https://www.dropbox.com/s/3vtzym61el1659z/04_custom_styles.png?dl=0
@@ -152,7 +150,7 @@ $(function() {
      */
     $(document)
         .find('body')
-        .append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css">');
+        .append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css">');    
 
 
     /**
@@ -205,7 +203,7 @@ $(function() {
         </div>`,
         true
     );
-
+        
 
     // Добавляем заголовок для кастомной CRM
     addCode(
@@ -215,7 +213,7 @@ $(function() {
         </div>`,
         true
     );
-
+    
     /**
      * Добавляем информацию
      *
@@ -224,7 +222,7 @@ $(function() {
      *
      * и получили такой объект в callback:
      */
-
+ 
     var panelCRM = {
         id: 25253,
         task1_id: "8392",
@@ -235,7 +233,7 @@ $(function() {
         deal1_name: "Заказ #23023",
         deal2_id: 24220,
         deal2_name: "Заказ #24220",
-        sum: "32000"
+        sum: "32000"	
     }
 
     //Отображаем эту информацию и стилизуем активные ссылки
@@ -266,7 +264,7 @@ $(function() {
     var handleMacroClick = function(templateId) {
         $(document).on('click', `#applyMacroButton_${templateId}`, function(e) {
             e.preventDefault();
-            // Применяем шаблон по клику на ссылку
+            // Применяем шаблон по клику на ссылку  
             $(`.apply-template[href="template_${templateId}"]`).click();
         });
     };
@@ -277,7 +275,7 @@ $(function() {
         var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
         addCode(containerSelector, buttonHtml, true);
         handleMacroClick(templateId);
-        applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID
+        applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID 
     };
 
     // Создаем функцию для стилизации ссылок
@@ -288,19 +286,20 @@ $(function() {
     // Функция для добавления шаблонов
     function addTemplateButtons() {
         // Ищем контейнеры для разных типов страниц
-        var emailContainer = $('.attach-first');  // Для email обращений
+        var emailContainer = $('.text-area-box .attach-wrapper');  // Для email обращений
         var chatContainer = $('.chat_msg_win_actions'); // Для чатов
 
         // Для EMAIL обращений
         if (emailContainer.length > 0 && $('#macroButtonsContainer').length === 0) {
             addCode(
-                '.attach-first',
+                '.text-area-box .attach-wrapper',
                 '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
                 true
             );
 
             var templateSelector = '#macroButtonsContainer';
 
+            // Добавляем новые ссылки для применения шаблона с обновленными ID
             addButton(templateSelector, 327703, 'Акция', {
                 'color': '#e48000',
                 'text-decoration': 'none',
@@ -310,7 +309,7 @@ $(function() {
                 'letter-spacing': '0.33px'
             });
 
-            addButton(templateSelector, 179994, 'Реализация', {
+            addButton(templateSelector, 328169, 'Реализация', {
                 'color': '#00868f',
                 'text-decoration': 'none',
                 'margin-right': '10px',
@@ -319,7 +318,7 @@ $(function() {
                 'letter-spacing': '0.33px'
             });
 
-            addButton(templateSelector, 163903, 'Каталог', {
+            addButton(templateSelector, 328170, 'Каталог', {
                 'color': '#ac00ae',
                 'text-decoration': 'none',
                 'margin-right': '10px',
@@ -337,7 +336,7 @@ $(function() {
                 // Добавляем контейнер для шаблонов ПОСЛЕ ul.clearfix
                 chatIconsList.after('<div id="chatMacroButtonsContainer" style="display: inline-block; margin-left: 15px; vertical-align: top; margin-top: 8px;"></div>');
 
-                // Добавляем кнопки в контейнер
+                // Добавляем кнопки в контейнер с обновленными ID
                 $('#chatMacroButtonsContainer').append(`
                     <a id="applyChatMacroButton_327703" href="#" style="
                         color: #e48000;
@@ -347,7 +346,7 @@ $(function() {
                         font-weight: 650;
                         letter-spacing: 0.33px;
                     ">Акция</a>
-                    <a id="applyChatMacroButton_179994" href="#" style="
+                    <a id="applyChatMacroButton_328169" href="#" style="
                         color: #00868f;
                         text-decoration: none;
                         margin-right: 10px;
@@ -355,7 +354,7 @@ $(function() {
                         font-weight: 650;
                         letter-spacing: 0.33px;
                     ">Реализация</a>
-                    <a id="applyChatMacroButton_163903" href="#" style="
+                    <a id="applyChatMacroButton_328170" href="#" style="
                         color: #ac00ae;
                         text-decoration: none;
                         margin-right: 10px;
@@ -366,7 +365,7 @@ $(function() {
                 `);
             }
 
-            // Обработчики кликов для чата
+            // Обработчики кликов для чата с обновленными ID
             $(document).on('click', '#applyChatMacroButton_327703', function(e) {
                 e.preventDefault();
                 var template = $(`._template_row[rel="327703"]`);
@@ -377,23 +376,23 @@ $(function() {
                 }
             });
 
-            $(document).on('click', '#applyChatMacroButton_179994', function(e) {
+            $(document).on('click', '#applyChatMacroButton_328169', function(e) {
                 e.preventDefault();
-                var template = $(`._template_row[rel="179994"]`);
+                var template = $(`._template_row[rel="328169"]`);
                 if (template.length > 0) {
                     template.click();
                 } else {
-                    $(`.apply-template[href="template_179994"]`).click();
+                    $(`.apply-template[href="template_328169"]`).click();
                 }
             });
 
-            $(document).on('click', '#applyChatMacroButton_163903', function(e) {
+            $(document).on('click', '#applyChatMacroButton_328170', function(e) {
                 e.preventDefault();
-                var template = $(`._template_row[rel="163903"]`);
+                var template = $(`._template_row[rel="328170"]`);
                 if (template.length > 0) {
                     template.click();
                 } else {
-                    $(`.apply-template[href="template_163903"]`).click();
+                    $(`.apply-template[href="template_328170"]`).click();
                 }
             });
         }
@@ -407,70 +406,70 @@ $(function() {
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
 
     // Сначала добавляем название блока
-    addCode(
-        INTEGRATION_PANEL_SELECTOR,
+    addCode( 
+        INTEGRATION_PANEL_SELECTOR, 
         `<div class="info_header clearfix">
             <p>Калькулятор стоимости доставки</p> </div>`,
-        true
+        true 
     );
-
-    // Создаем селектор и его HTML-верстку
-    var addComplexCalculator = function(containerSelector) {
-        var calculatorHTML =
+    
+    // Создаем селектор и его HTML-верстку 
+    var addComplexCalculator = function(containerSelector) { 
+        var calculatorHTML = 
 
         `<div id="complexCalculator" style="margin-bottom: 20px;">
-            <div style="margin-bottom: 10px;">
-                <label for="weight" style="margin-right: 5px;">Вес
+            <div style="margin-bottom: 10px;"> 
+                <label for="weight" style="margin-right: 5px;">Вес 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(кг)</span>
-                </label>
+                </label> 
                 <input type="number" id="weight" placeholder="Введите вес" style="right: 23px; position: absolute;">
             </div>
-
-            <div style="margin-bottom: 10px;">
-                <label for="height" style="margin-right: 5px;">Высота
+            
+            <div style="margin-bottom: 10px;"> 
+                <label for="height" style="margin-right: 5px;">Высота 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
-                </label>
+                </label> 
                 <input type="number" id="height" placeholder="Введите высоту" style="right: 23px; position: absolute;">
-            </div>
-
-            <div style="margin-bottom: 10px;">
-                <label for="width" style="margin-right: 5px;">Ширина
+            </div> 
+            
+            <div style="margin-bottom: 10px;"> 
+                <label for="width" style="margin-right: 5px;">Ширина 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
-                </label>
+                </label> 
                 <input type="number" id="width" placeholder="Введите ширину" style="right: 23px; position: absolute;">
-            </div>
-
+            </div> 
+            
             <div style="margin-bottom: 10px;">
-                <label for="length" style="margin-right: 5px;">Длина
+                <label for="length" style="margin-right: 5px;">Длина 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(cм)</span>
                 </label>
                 <input type="number" id="length" placeholder="Введите длину" style="right: 23px; position: absolute;">
-            </div>
-
-            <div style="margin-bottom: 10px;">
-                <label for="distance" style="margin-right: 5px;">Дистанция
+            </div> 
+            
+            <div style="margin-bottom: 10px;"> 
+                <label for="distance" style="margin-right: 5px;">Дистанция 
                     <span style="color: #000000; font-weight: 600; font-size: 12px;">(км)</span>
                 </label>
                 <input type="number" id="distance" placeholder="Введите дистанцию" style="right: 23px; position: absolute;">
-            </div>
-
-            <div id="buttonsContainer" style="margin-top: 15px; display: flex; justify-content: space-between;">
-
+            </div> 
+            
+            <div id="buttonsContainer" style="margin-top: 15px; display: flex; justify-content: space-between;"> 
+                            
                 <button id="refreshBtn" style="padding: 8px 11px 7px 11px; background: #558ffd; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 0.4px; margin-left: -3px;">
                     ОБНОВИТЬ
                 </button>
 
                 <button id="calculateBtn" style="position: absolute; right: 23px; padding: 8px 10px 7px 10px; background: #29ab30; color: #fff; border: none; border-radius: 3px; font-size: 13px; letter-spacing: 1.1px; width: 154px">
                     ПОДСЧИТАТЬ
-                </button>
-
-            </div>
-
+                </button> 
+            
+            </div> 
+            
             <p id="resultLabel" style="font-weight: bold; font-size: 14px; color: #000000; margin-top: 15px;">
-                Результат:
-                    <span id="resultValue" style="font-weight: bold; font-size: 14px; color: #29ab30; right: 5px;"></span>
-            </p>
-        </div> `;
+                Результат: 
+                    <span id="resultValue" style="font-weight: bold; font-size: 14px; color: #29ab30; right: 5px;"></span> 
+            </p>                     
+        </div> `; 
 
         // При запуске функции containerSelector показываем верстку блока
         $(containerSelector).append(calculatorHTML);
@@ -482,24 +481,24 @@ $(function() {
 
         // По клику по кнопке калькулятора «Обновить» очищаем все поля
         $(containerSelector).on('click', '#refreshBtn', function() {
-            $('#weight, #height, #width, #length, #distance').val('');
+            $('#weight, #height, #width, #length, #distance').val(''); 
             $('#resultValue').text('');
         });
     };
 
 
     // Функция подсчёта стоимости
-    var calculateCost = function() {
-
-        var weight = parseFloat($('#weight').val()) || 0;
-        var height = parseFloat($('#height').val()) || 0;
-        var width = parseFloat($('#width').val()) || 0;
-        var length = parseFloat($('#length').val()) || 0;
+    var calculateCost = function() { 
+    
+        var weight = parseFloat($('#weight').val()) || 0; 
+        var height = parseFloat($('#height').val()) || 0; 
+        var width = parseFloat($('#width').val()) || 0; 
+        var length = parseFloat($('#length').val()) || 0; 
         var distance = parseFloat($('#distance').val()) || 0;
-
+    
         // Подсчёт стоимости по весу
-        var weightCost = 0;
-
+        var weightCost = 0; 
+        
         if (weight <= 2) {
             weightCost = 0;
         } else if (weight <= 5) {
@@ -509,31 +508,31 @@ $(function() {
         } else {
             weightCost = 20 * weight + 50;
         }
-
+        
         // Подсчёт объёма
         var volume = (height * width * length) / 1000000; // конвертируем см3 в м3
-
+    
         // Подсчёт стоимости по объёму
-        var volumeCost = 0; if (volume > 500) {
+        var volumeCost = 0; if (volume > 500) { 
             volumeCost = volume * 1 + 100;
         } else if (volume > 300) {
             volumeCost = 100;
         }
-
+        
         // Подсчёт стоимости по дистанции
         var distanceCost = distance;
-
+        
         // Подсчёт общей стоимости
         var totalCost = weightCost + volumeCost + distanceCost;
-
+    
         // Отображаем результат в рублях
         $('#resultValue').text(totalCost.toFixed(2) + ' рублей');
-
+        
     };
-
+    
     // Добавляем блок с калькулятором в панель интеграций после загрузки элементов страницы
-    $(document).ready(function() {
+    $(document).ready(function() {    
         addComplexCalculator('#integrations_info_panel');
     });
-
+    
 });
