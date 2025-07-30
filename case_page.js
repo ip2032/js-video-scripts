@@ -241,19 +241,32 @@ $(function() {
 
     // Функция для добавления кнопок шаблонов
     var TemplateButtons = {
+        initialized: false,
+        
         init: function() {
+            // Защита от повторной инициализации
+            if (this.initialized) {
+                return;
+            }
+            
+            // Удаляем все существующие кнопки перед добавлением новых
+            $('[data-template]').remove();
+            $('#chatTemplateButtons, #emailTemplateButtons').remove();
+            
             // Определяем тип страницы
             if ($('.chat_msg_win_actions ul').length > 0) {
                 this.addChatTemplates();
             } else if ($('.attach-first').length > 0) {
                 this.addEmailTemplates();
             }
+            
+            this.initialized = true;
         },
 
         addChatTemplates: function() {
             var chatIcons = $('.chat_msg_win_actions ul');
-            if (chatIcons.length > 0 && !$('#chatTemplateButtons').length) {
-                // Добавляем кнопки как простые li элементы в стиле иконок
+            if (chatIcons.length > 0) {
+                // Добавляем кнопки как простые li элементы
                 var templateButtons = `
                     <li title="Акция 22"><a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650;">Акция</a></li>
                     <li title="Реализация"><a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650;">Реализация</a></li>
@@ -265,7 +278,7 @@ $(function() {
 
         addEmailTemplates: function() {
             var attachFirst = $('.attach-first');
-            if (attachFirst.length > 0 && !$('#emailTemplateButtons').length) {
+            if (attachFirst.length > 0) {
                 // Добавляем кнопки в том же div что и "Прикрепить файл"
                 var templateButtons = `
                     <div id="emailTemplateButtons" style="display: inline-flex; align-items: center; gap: 8px; margin-left: 15px;">
@@ -279,17 +292,19 @@ $(function() {
         }
     };
 
-    // Обработчик клика по кнопкам шаблонов
-    $(document).on('click', '[data-template]', function(e) {
+    // Обработчик клика по кнопкам шаблонов (один раз)
+    $(document).off('click', '[data-template]').on('click', '[data-template]', function(e) {
         e.preventDefault();
         var templateId = $(this).data('template');
         $(`.apply-template[href="template_${templateId}"]`).click();
     });
 
-    // Инициализация кнопок шаблонов с задержками
-    setTimeout(function() { TemplateButtons.init(); }, 500);
-    setTimeout(function() { TemplateButtons.init(); }, 1000);
-    setTimeout(function() { TemplateButtons.init(); }, 2000);
+    // Инициализация только один раз с небольшой задержкой
+    $(document).ready(function() {
+        setTimeout(function() { 
+            TemplateButtons.init(); 
+        }, 1000);
+    });
 
 
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
