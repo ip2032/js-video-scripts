@@ -1,13 +1,3 @@
-// ==UserScript==
-// @name         case_page.js
-// @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Test script for Omnidesk templates with chat support
-// @author       You
-// @match        https://st.omnidesk.ru/staff/cases/record*
-// @match        https://st.omnidesk.ru/staff/cases/chat/*
-// @grant        none
-// ==/UserScript==
 
 $(function() {
     /**
@@ -244,8 +234,8 @@ $(function() {
         `<div class="info_fields">
 
             <h6>Последние задачи</h6>
-                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task1_id}">${panelCRM.task1_name}</a></p>
-                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task2_id}">${panelCRM.task2_name}</a></p>
+                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task1}"</a>${panelCRM.task1_name}</p>
+                <p style="word-wrap: break-word;"><a href="${URL}/id/${panelCRM.task2}"</a>${panelCRM.task2_name}</p>
                 <p style="word-wrap: break-word;"><a href="${URL}/createtask" style="color:#078d23; text-decoration: underline;">Создать задачу</a></p>
 
             <h6>Последние сделки</h6>
@@ -254,7 +244,7 @@ $(function() {
                 <p style="word-wrap: break-word;"><a href="${URL}/create_deal" style="color: #078d23; text-decoration: underline;">Создать сделку</a></p>
 
             <h6>Общая сумма сделок</h6>
-                <p style="word-wrap: break-word;"><i class="fa-solid fa-circle-dollar" style="margin-right: 5px; color: #8b8b8b;"></i>${panelCRM.sum} р.</p>
+                <p style="word-wrap: break-word;">${panelCRM.sum} р.</p>
 
         </div>`,
         true
@@ -582,10 +572,5 @@ $(function() {
     $(document).ready(function() {
         addComplexCalculator('#integrations_info_panel');
     });
-
-    // Подключаем Font Awesome для иконки рубля
-    $(document)
-        .find('body')
-        .append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">');
 
 });
