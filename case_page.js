@@ -268,7 +268,7 @@ $(function() {
             if (chatContainer.length > 0) {
                 // Добавляем кнопки как обычные inline ссылки ПОСЛЕ ul с иконками
                 var templateButtons = `
-                    <div style="display: inline-block; margin-left: 10px;">
+                    <div style="display: inline-block; margin-left: 10px; margin-top: 8px;">
                         <a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650; margin-right: 8px;">Акция</a>
                         <a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650; margin-right: 8px;">Реализация</a>
                         <a href="#" data-template="163903" style="color: #ac00ae; text-decoration: none; font-size: 11px; font-weight: 650;">Каталог</a>
