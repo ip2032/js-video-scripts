@@ -264,15 +264,17 @@ $(function() {
         },
 
         addChatTemplates: function() {
-            var chatIcons = $('.chat_msg_win_actions ul');
-            if (chatIcons.length > 0) {
-                // Добавляем кнопки как простые li элементы
+            var chatContainer = $('.chat_msg_win_actions');
+            if (chatContainer.length > 0) {
+                // Добавляем кнопки как обычные inline ссылки ПОСЛЕ ul с иконками
                 var templateButtons = `
-                    <li title="Акция 22"><a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650;">Акция</a></li>
-                    <li title="Реализация"><a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650;">Реализация</a></li>
-                    <li title="Каталог"><a href="#" data-template="163903" style="color: #ac00ae; text-decoration: none; font-size: 11px; font-weight: 650;">Каталог</a></li>
+                    <div style="display: inline-block; margin-left: 10px;">
+                        <a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650; margin-right: 8px;">Акция</a>
+                        <a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650; margin-right: 8px;">Реализация</a>
+                        <a href="#" data-template="163903" style="color: #ac00ae; text-decoration: none; font-size: 11px; font-weight: 650;">Каталог</a>
+                    </div>
                 `;
-                chatIcons.append(templateButtons);
+                chatContainer.find('ul').after(templateButtons);
             }
         },
 
