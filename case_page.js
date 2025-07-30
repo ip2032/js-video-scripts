@@ -187,12 +187,12 @@ $(function() {
             { id: 179994, name: 'Реализация', color: '#00868f' },
             { id: 163903, name: 'Каталог', color: '#ac00ae' }
         ],
+        initialized: false,
 
         // Универсальная функция применения шаблона
         applyTemplate: function(templateId) {
             console.log('Применяем шаблон:', templateId);
             
-            // Список возможных селекторов для разных типов страниц
             var selectors = [
                 `.apply-template[href="template_${templateId}"]`,
                 `._template_row[rel="${templateId}"]`,
@@ -215,90 +215,141 @@ $(function() {
             
             if (!applied) {
                 console.warn('Шаблон не найден:', templateId);
-                console.log('Доступные шаблоны на странице:');
-                $('.apply-template, ._template_row, .template_row').each(function() {
-                    var href = $(this).attr('href') || $(this).attr('rel');
-                    if (href) console.log(' -', href, $(this).text().trim());
-                });
             }
         },
 
-        // Создание кнопки шаблона
-        createButton: function(template) {
-            return `<a href="#" class="macro-button template-btn" data-template-id="${template.id}" 
-                       style="color: ${template.color};">${template.name}</a>`;
+        // Удаление всех существующих кнопок шаблонов
+        removeExistingButtons: function() {
+            $('#emailMacroButtons, #chatMacroButtons, .template-buttons-container').remove();
+        },
+
+        // Добавление шаблонов для email с правильным размещением
+        addEmailTemplates: function() {
+            // Ищем правильный контейнер для email
+            var attachContainer = $('.attach-first');
+            var textareaContainer = $('.text-area-box .attach-wrapper');
+            
+            var targetContainer = null;
+            
+            if (attachContainer.length > 0) {
+                targetContainer = attachContainer;
+            } else if (textareaContainer.length > 0) {
+                targetContainer = textareaContainer;
+            }
+            
+            if (!targetContainer || targetContainer.find('.template-buttons-container').length > 0) {
+                return;
+            }
+            
+            console.log('Добавляем email шаблоны в:', targetContainer.get(0));
+            
+            var buttonsHtml = `<div class="template-buttons-container" style="
+                display: inline-flex; 
+                align-items: center; 
+                margin-left: 10px; 
+                gap: 8px;
+                vertical-align: middle;
+            ">`;
+            
+            this.templates.forEach(function(template) {
+                buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
+                    color: ${template.color};
+                    text-decoration: none;
+                    font-size: 11px;
+                    font-weight: 650;
+                    letter-spacing: 0.33px;
+                    cursor: pointer;
+                ">${template.name}</a>`;
+            });
+            buttonsHtml += '</div>';
+            
+            targetContainer.append(buttonsHtml);
+        },
+
+        // Добавление шаблонов для чата
+        addChatTemplates: function() {
+            var container = $('.chat_msg_win_actions');
+            if (container.length === 0 || container.find('.template-buttons-container').length > 0) {
+                return;
+            }
+            
+            console.log('Добавляем чат шаблоны');
+            
+            var buttonsHtml = `<div class="template-buttons-container" style="
+                display: inline-flex; 
+                align-items: center; 
+                margin-left: 15px; 
+                margin-top: 8px; 
+                gap: 8px;
+            ">`;
+            
+            this.templates.forEach(function(template) {
+                buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
+                    color: ${template.color};
+                    text-decoration: none;
+                    font-size: 11px;
+                    font-weight: 650;
+                    letter-spacing: 0.33px;
+                    cursor: pointer;
+                ">${template.name}</a>`;
+            });
+            buttonsHtml += '</div>';
+            
+            // Размещаем после панели с иконками
+            var iconsList = container.find('ul.clearfix');
+            if (iconsList.length > 0) {
+                iconsList.after(buttonsHtml);
+            } else {
+                container.append(buttonsHtml);
+            }
         },
 
         // Определение типа страницы
         getPageType: function() {
             if ($('.chat_msg_win_actions').length > 0) {
                 return 'chat';
-            } else if ($('.attach-first').length > 0) {
+            } else if ($('.attach-first, .text-area-box').length > 0) {
                 return 'email';
             }
             return 'unknown';
         },
 
-        // Добавление шаблонов для email
-        addEmailTemplates: function() {
-            var container = $('.attach-first');
-            if (container.length === 0 || $('#emailMacroButtons').length > 0) return;
-            
-            console.log('Добавляем email шаблоны');
-            var buttonsHtml = '<div id="emailMacroButtons" style="display: inline-flex; align-items: center; margin-left: 15px; gap: 8px;">';
-            
-            this.templates.forEach(function(template) {
-                buttonsHtml += TemplateSystem.createButton(template);
-            });
-            buttonsHtml += '</div>';
-            
-            container.append(buttonsHtml);
-        },
-
-        // Добавление шаблонов для чата
-        addChatTemplates: function() {
-            var container = $('.chat_msg_win_actions');
-            if (container.length === 0 || $('#chatMacroButtons').length > 0) return;
-            
-            console.log('Добавляем чат шаблоны');
-            var buttonsHtml = '<div id="chatMacroButtons" style="display: inline-flex; align-items: center; margin-left: 15px; margin-top: 8px; gap: 8px;">';
-            
-            this.templates.forEach(function(template) {
-                buttonsHtml += TemplateSystem.createButton(template);
-            });
-            buttonsHtml += '</div>';
-            
-            // Размещаем после панели с иконками
-            var targetContainer = container.find('ul.clearfix');
-            if (targetContainer.length > 0) {
-                targetContainer.after(buttonsHtml);
-            } else {
-                container.append(buttonsHtml);
-            }
-        },
-
-        // Инициализация системы шаблонов
+        // Инициализация с защитой от повторного вызова
         init: function() {
+            if (this.initialized) {
+                console.log('TemplateSystem уже инициализирован');
+                return;
+            }
+            
             var self = this;
             var pageType = this.getPageType();
             
-            console.log('Тип страницы:', pageType);
+            console.log('Инициализация TemplateSystem, тип страницы:', pageType);
             
             // Универсальный обработчик кликов
-            $(document).on('click', '.template-btn', function(e) {
+            $(document).off('click.templates').on('click.templates', '.template-btn', function(e) {
                 e.preventDefault();
                 var templateId = $(this).data('template-id');
                 self.applyTemplate(templateId);
             });
             
-            // Добавляем шаблоны только для соответствующего типа страницы
-            setTimeout(function() {
+            // Функция для добавления шаблонов
+            var addTemplates = function() {
+                self.removeExistingButtons(); // Удаляем существующие кнопки
+                
                 if (pageType === 'email') {
                     self.addEmailTemplates();
                 } else if (pageType === 'chat') {
                     self.addChatTemplates();
                 }
-            }, 1000);
+            };
+            
+            // Добавляем шаблоны с несколькими попытками
+            setTimeout(addTemplates, 500);
+            setTimeout(addTemplates, 1000);
+            setTimeout(addTemplates, 2000);
+            
+            this.initialized = true;
         }
     };
 
