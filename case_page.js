@@ -225,19 +225,26 @@ $(function() {
 
         // Добавление шаблонов для email с правильным размещением
         addEmailTemplates: function() {
-            // Ищем правильный контейнер для email
+            // Ищем контейнер с иконками для email
+            var iconsContainer = $('.text-area-box .attach-wrapper');
             var attachContainer = $('.attach-first');
-            var textareaContainer = $('.text-area-box .attach-wrapper');
+            
+            // Проверяем, не добавлены ли уже кнопки
+            if ($('.template-buttons-container').length > 0) {
+                return;
+            }
             
             var targetContainer = null;
             
-            if (attachContainer.length > 0) {
+            // Определяем правильный контейнер
+            if (iconsContainer.length > 0) {
+                targetContainer = iconsContainer;
+            } else if (attachContainer.length > 0) {
                 targetContainer = attachContainer;
-            } else if (textareaContainer.length > 0) {
-                targetContainer = textareaContainer;
             }
             
-            if (!targetContainer || targetContainer.find('.template-buttons-container').length > 0) {
+            if (!targetContainer) {
+                console.log('Контейнер для email шаблонов не найден');
                 return;
             }
             
@@ -263,7 +270,8 @@ $(function() {
             });
             buttonsHtml += '</div>';
             
-            targetContainer.append(buttonsHtml);
+            // Добавляем кнопки ПЕРЕД существующими элементами, чтобы не заменить иконки
+            targetContainer.prepend(buttonsHtml);
         },
 
         // Добавление шаблонов для чата
@@ -279,7 +287,7 @@ $(function() {
                 display: inline-flex; 
                 align-items: center; 
                 margin-left: 15px; 
-                margin-top: 8px; 
+                margin-top: 10px; 
                 gap: 8px;
             ">`;
             
@@ -295,12 +303,12 @@ $(function() {
             });
             buttonsHtml += '</div>';
             
-            // Размещаем после панели с иконками
+            // Размещаем ПЕРЕД панелью с иконками, а не после
             var iconsList = container.find('ul.clearfix');
             if (iconsList.length > 0) {
-                iconsList.after(buttonsHtml);
+                iconsList.before(buttonsHtml);
             } else {
-                container.append(buttonsHtml);
+                container.prepend(buttonsHtml);
             }
         },
 
