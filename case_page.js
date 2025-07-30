@@ -225,53 +225,64 @@ $(function() {
 
         // Добавление шаблонов для email с правильным размещением
         addEmailTemplates: function() {
-            // Ищем контейнер с иконками для email
-            var iconsContainer = $('.text-area-box .attach-wrapper');
-            var attachContainer = $('.attach-first');
-            
             // Проверяем, не добавлены ли уже кнопки
             if ($('.template-buttons-container').length > 0) {
                 return;
             }
             
+            // Ищем контейнер с иконками прикрепления файла
+            var attachWrapper = $('.text-area-box .attach-wrapper');
+            var attachFirst = $('.attach-first');
+            
             var targetContainer = null;
             
-            // Определяем правильный контейнер
-            if (iconsContainer.length > 0) {
-                targetContainer = iconsContainer;
-            } else if (attachContainer.length > 0) {
-                targetContainer = attachContainer;
+            if (attachWrapper.length > 0) {
+                // Находим ссылку "Прикрепить файл" и добавляем кнопки после неё
+                var attachLink = attachWrapper.find('a').first();
+                if (attachLink.length > 0) {
+                    console.log('Добавляем email шаблоны после ссылки прикрепления');
+                    
+                    var buttonsHtml = this.templates.map(function(template) {
+                        return `<a href="#" class="template-btn" data-template-id="${template.id}" style="
+                            color: ${template.color};
+                            text-decoration: none;
+                            font-size: 11px;
+                            font-weight: 650;
+                            letter-spacing: 0.33px;
+                            cursor: pointer;
+                            margin-left: 15px;
+                        ">${template.name}</a>`;
+                    }).join('');
+                    
+                    attachLink.after(buttonsHtml);
+                    return;
+                }
             }
             
-            if (!targetContainer) {
-                console.log('Контейнер для email шаблонов не найден');
-                return;
+            if (attachFirst.length > 0) {
+                console.log('Добавляем email шаблоны в attach-first');
+                
+                var buttonsHtml = `<div class="template-buttons-container" style="
+                    display: inline-flex; 
+                    align-items: center; 
+                    margin-left: 15px; 
+                    gap: 8px;
+                ">`;
+                
+                this.templates.forEach(function(template) {
+                    buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
+                        color: ${template.color};
+                        text-decoration: none;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                        cursor: pointer;
+                    ">${template.name}</a>`;
+                });
+                buttonsHtml += '</div>';
+                
+                attachFirst.append(buttonsHtml);
             }
-            
-            console.log('Добавляем email шаблоны в:', targetContainer.get(0));
-            
-            var buttonsHtml = `<div class="template-buttons-container" style="
-                display: inline-flex; 
-                align-items: center; 
-                margin-left: 10px; 
-                gap: 8px;
-                vertical-align: middle;
-            ">`;
-            
-            this.templates.forEach(function(template) {
-                buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
-                    color: ${template.color};
-                    text-decoration: none;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                    cursor: pointer;
-                ">${template.name}</a>`;
-            });
-            buttonsHtml += '</div>';
-            
-            // Добавляем кнопки ПЕРЕД существующими элементами, чтобы не заменить иконки
-            targetContainer.prepend(buttonsHtml);
         },
 
         // Добавление шаблонов для чата
@@ -283,31 +294,53 @@ $(function() {
             
             console.log('Добавляем чат шаблоны');
             
-            var buttonsHtml = `<div class="template-buttons-container" style="
-                display: inline-flex; 
-                align-items: center; 
-                margin-left: 15px; 
-                margin-top: 10px; 
-                gap: 8px;
-            ">`;
+            // Ищем существующие иконки чата
+            var iconsContainer = container.find('ul.clearfix');
             
-            this.templates.forEach(function(template) {
-                buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
-                    color: ${template.color};
-                    text-decoration: none;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                    cursor: pointer;
-                ">${template.name}</a>`;
-            });
-            buttonsHtml += '</div>';
-            
-            // Размещаем ПЕРЕД панелью с иконками, а не после
-            var iconsList = container.find('ul.clearfix');
-            if (iconsList.length > 0) {
-                iconsList.before(buttonsHtml);
+            if (iconsContainer.length > 0) {
+                // Добавляем кнопки как отдельную строку НАД иконками
+                var buttonsHtml = `<div class="template-buttons-container" style="
+                    display: block; 
+                    margin-bottom: 8px;
+                    padding-left: 0;
+                ">`;
+                
+                this.templates.forEach(function(template, index) {
+                    buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
+                        color: ${template.color};
+                        text-decoration: none;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                        cursor: pointer;
+                        margin-right: 15px;
+                    ">${template.name}</a>`;
+                });
+                buttonsHtml += '</div>';
+                
+                // Вставляем ПЕРЕД контейнером с иконками
+                iconsContainer.before(buttonsHtml);
             } else {
+                // Если иконок нет, добавляем в начало контейнера
+                var buttonsHtml = `<div class="template-buttons-container" style="
+                    display: inline-flex; 
+                    align-items: center; 
+                    margin-bottom: 10px; 
+                    gap: 8px;
+                ">`;
+                
+                this.templates.forEach(function(template) {
+                    buttonsHtml += `<a href="#" class="template-btn" data-template-id="${template.id}" style="
+                        color: ${template.color};
+                        text-decoration: none;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                        cursor: pointer;
+                    ">${template.name}</a>`;
+                });
+                buttonsHtml += '</div>';
+                
                 container.prepend(buttonsHtml);
             }
         },
