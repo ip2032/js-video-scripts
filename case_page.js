@@ -1,3 +1,14 @@
+// ==UserScript==
+// @name         case_page.js
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Test script for Omnidesk templates with chat support
+// @author       You
+// @match        https://st.omnidesk.ru/staff/cases/record*
+// @match        https://st.omnidesk.ru/staff/cases/chat/*
+// @grant        none
+// ==/UserScript==
+
 $(function() {
     /**
      * Ваш сайт, для примеров работы с запросами
