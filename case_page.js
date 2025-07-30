@@ -239,71 +239,59 @@ $(function() {
     );
     /* БЫСТРЫЕ ШАБЛОНЫ */
 
-    // Выносим ссылки для быстрого применения шаблона и стилизуем их
-    var addButton = function(containerSelector, templateId, buttonText, styles) {
-        var buttonId = `applyMacroButton_${templateId}`;
-        var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
-        addCode(containerSelector, buttonHtml, true);
-        handleMacroClick(templateId);
-        applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID 
+    // Функция для добавления кнопок шаблонов
+    var TemplateButtons = {
+        init: function() {
+            // Определяем тип страницы
+            if ($('.chat_msg_win_actions ul').length > 0) {
+                this.addChatTemplates();
+            } else if ($('.attach-first').length > 0) {
+                this.addEmailTemplates();
+            }
+        },
+
+        addChatTemplates: function() {
+            var chatIcons = $('.chat_msg_win_actions ul');
+            if (chatIcons.length > 0 && !$('#chatTemplateButtons').length) {
+                // Добавляем кнопки как li элементы в существующий ul
+                var templateButtons = `
+                    <li id="chatTemplateButtons" style="display: inline-flex; align-items: center; gap: 8px; margin-left: 15px;">
+                        <a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Акция 22</a>
+                        <a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Реализация</a>
+                        <a href="#" data-template="163903" style="color: #ac00ae; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Каталог</a>
+                    </li>
+                `;
+                chatIcons.append(templateButtons);
+            }
+        },
+
+        addEmailTemplates: function() {
+            var attachFirst = $('.attach-first');
+            if (attachFirst.length > 0 && !$('#emailTemplateButtons').length) {
+                // Добавляем кнопки в том же div что и "Прикрепить файл"
+                var templateButtons = `
+                    <div id="emailTemplateButtons" style="display: inline-flex; align-items: center; gap: 8px; margin-left: 15px;">
+                        <a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Акция 22</a>
+                        <a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Реализация</a>
+                        <a href="#" data-template="163903" style="color: #ac00ae; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Каталог</a>
+                    </div>
+                `;
+                attachFirst.append(templateButtons);
+            }
+        }
     };
 
-
-    // По клику находим ID шаблона, и применяем его, подставляя ID
-    var handleMacroClick = function(templateId) {
-        $(document).on('click', `#applyMacroButton_${templateId}`, function() {
-            // Применяем шаблон по клику на ссылку  
-            $(`.apply-template[href="template_${templateId}"]`).click();
-        });
-    };
-
-    // Создаем функцию для стилизации ссылок
-    var applyStyles = function(selector, styles) {
-        $(selector).css(styles);
-    };
-
-    // Создаем селектор для блока, в который добавим ссылки 
-    var buttonContainerSelector = '.text-area-box .attach-wrapper';
-
-    // Проверяем, если кастомная ссылка на шаблон уже есть на странице, если нет, то добавляем
-    if ($('#macroButtonsContainer').length === 0) {
-        addCode(
-            buttonContainerSelector, 
-            '<div id="macroButtonsContainer" style="margin-top: 10px; display: inline-flex; gap: 8px; margin-left: 10px;"></div>',
-            true
-        );
-    }
-
-    // Добавляем селектор для созданного блока ссылок
-    var templateSelector = '#macroButtonsContainer';
-
-    // Очищаем существующие данные, чтобы добавить определенные шаблоны
-    $('#macroButtonsContainer').empty();
-
-    // Добавляем новые ссылки для применения шаблона и стилизуем их
-    addButton(templateSelector, 210005, 'Акция 22', { 
-        'color': '#e48000',
-        'text-decoration': 'none',
-        'font-size': '11px',
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
-    });
-    
-    addButton(templateSelector, 179994, 'Реализация', {
-        'color': '#00868f',
-        'text-decoration': 'none',
-        'font-size': '11px',
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
+    // Обработчик клика по кнопкам шаблонов
+    $(document).on('click', '[data-template]', function(e) {
+        e.preventDefault();
+        var templateId = $(this).data('template');
+        $(`.apply-template[href="template_${templateId}"]`).click();
     });
 
-    addButton(templateSelector, 163903, 'Каталог', {
-        'color': '#ac00ae', 
-        'text-decoration': 'none',
-        'font-size': '11px', 
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
-    });
+    // Инициализация кнопок шаблонов с задержками
+    setTimeout(function() { TemplateButtons.init(); }, 500);
+    setTimeout(function() { TemplateButtons.init(); }, 1000);
+    setTimeout(function() { TemplateButtons.init(); }, 2000);
 
 
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
