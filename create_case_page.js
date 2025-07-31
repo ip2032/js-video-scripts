@@ -253,61 +253,90 @@ $(function() {
         </div>`,
         true
     );
-    /* БЫСТРЫЕ ШАБЛОНЫ */
 
-// Функция для восстановления кнопок
-var restoreButtons = function() {
-    setTimeout(function() {
-        if ($('.attach-first').length > 0 && $('#macroButtonsContainer').length === 0) {
-            // Восстанавливаем контейнер
-            addCode(
-                '.attach-first', 
-                '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
-                true
-            );
+    
+/* БЫСТРЫЕ ШАБЛОНЫ */
 
-            var templateSelector = '#macroButtonsContainer';
+// Функция для создания кнопок
+var createTemplateButtons = function() {
+    // Удаляем старый контейнер если он есть
+    $('#macroButtonsContainer').remove();
+    
+    // Проверяем, есть ли контейнер для кнопок
+    if ($('.attach-first').length === 0) {
+        return; // Если нет контейнера, выходим
+    }
+    
+    // Создаем новый контейнер
+    addCode(
+        '.attach-first', 
+        '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
+        true
+    );
 
-            // Добавляем кнопки заново
-            addButton(templateSelector, 327703, 'Акция', { 
-                'color': '#e48000',
-                'text-decoration': 'none',
-                'margin-right': '10px',
-                'font-size': '11px',
-                'font-weight': '650',
-                'letter-spacing': '0.33px' 
-            });
-            
-            addButton(templateSelector, 328169, 'Реализация', {
-                'color': '#00868f',
-                'text-decoration': 'none',
-                'margin-right': '10px',
-                'font-size': '11px',
-                'font-weight': '650',
-                'letter-spacing': '0.33px' 
-            });
+    var templateSelector = '#macroButtonsContainer';
 
-            addButton(templateSelector, 328170, 'Каталог', {
-                'color': '#ac00ae', 
-                'text-decoration': 'none',
-                'margin-right': '10px', 
-                'font-size': '11px', 
-                'font-weight': '650',
-                'letter-spacing': '0.33px' 
-            });
-        }
-    }, 500);
+    // Добавляем кнопки
+    addButton(templateSelector, 327703, 'Акция', { 
+        'color': '#e48000',
+        'text-decoration': 'none',
+        'margin-right': '10px',
+        'font-size': '11px',
+        'font-weight': '650',
+        'letter-spacing': '0.33px' 
+    });
+    
+    addButton(templateSelector, 328169, 'Реализация', {
+        'color': '#00868f',
+        'text-decoration': 'none',
+        'margin-right': '10px',
+        'font-size': '11px',
+        'font-weight': '650',
+        'letter-spacing': '0.33px' 
+    });
+
+    addButton(templateSelector, 328170, 'Каталог', {
+        'color': '#ac00ae', 
+        'text-decoration': 'none',
+        'margin-right': '10px', 
+        'font-size': '11px', 
+        'font-weight': '650',
+        'letter-spacing': '0.33px' 
+    });
 };
 
 // По клику находим ID шаблона, и применяем его, подставляя ID
 var handleMacroClick = function(templateId) {
+    // Используем делегирование событий для избежания дублирования
+    $(document).off('click', `#applyMacroButton_${templateId}`);
     $(document).on('click', `#applyMacroButton_${templateId}`, function(e) {
         e.preventDefault();
+        console.log('Применяем шаблон:', templateId);
+        
         // Применяем шаблон по клику на ссылку  
         $(`.apply-template[href="template_${templateId}"]`).click();
         
-        // Восстанавливаем кнопки после применения шаблона
-        restoreButtons();
+        // Восстанавливаем кнопки через несколько попыток с разными интервалами
+        setTimeout(function() {
+            console.log('Попытка восстановления 1 (500ms)');
+            if ($('#macroButtonsContainer').length === 0) {
+                createTemplateButtons();
+            }
+        }, 500);
+        
+        setTimeout(function() {
+            console.log('Попытка восстановления 2 (1000ms)');
+            if ($('#macroButtonsContainer').length === 0) {
+                createTemplateButtons();
+            }
+        }, 1000);
+        
+        setTimeout(function() {
+            console.log('Попытка восстановления 3 (2000ms)');
+            if ($('#macroButtonsContainer').length === 0) {
+                createTemplateButtons();
+            }
+        }, 2000);
     });
 };
 
@@ -317,7 +346,7 @@ var addButton = function(containerSelector, templateId, buttonText, styles) {
     var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
     addCode(containerSelector, buttonHtml, true);
     handleMacroClick(templateId);
-    applyStyles(`#${buttonId}`, styles); // Находим и стилизуем кнопки по ID 
+    applyStyles(`#${buttonId}`, styles);
 };
 
 // Создаем функцию для стилизации ссылок
@@ -325,50 +354,50 @@ var applyStyles = function(selector, styles) {
     $(selector).css(styles);
 };
 
-// Создаем селектор для блока, в который добавим ссылки - теперь в тот же блок, что и "Прикрепить файл"
-var buttonContainerSelector = '.attach-first';
-
-// Проверяем, если кастомная ссылка на шаблон уже есть на странице, если нет, то добавляем
-if ($('#macroButtonsContainer').length === 0) {
-    addCode(
-        buttonContainerSelector, 
-        '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
-        true
-    );
-}
-
-// Добавляем селектор для созданного блока ссылок
-var templateSelector = '#macroButtonsContainer';
-
-// Очищаем существующие данные, чтобы добавить определенные шаблоны
-$('#macroButtonsContainer').empty();
-
-// Добавляем новые ссылки для применения шаблона и стилизуем их с обновленными ID
-addButton(templateSelector, 327703, 'Акция', { 
-    'color': '#e48000',
-    'text-decoration': 'none',
-    'margin-right': '10px',
-    'font-size': '11px',
-    'font-weight': '650',
-    'letter-spacing': '0.33px' 
+// Создаем кнопки при загрузке
+$(document).ready(function() {
+    createTemplateButtons();
 });
 
-addButton(templateSelector, 328169, 'Реализация', {
-    'color': '#00868f',
-    'text-decoration': 'none',
-    'margin-right': '10px',
-    'font-size': '11px',
-    'font-weight': '650',
-    'letter-spacing': '0.33px' 
+// Дополнительная защита - проверяем каждые 3 секунды
+setInterval(function() {
+    if ($('.attach-first').length > 0 && $('#macroButtonsContainer').length === 0) {
+        console.log('Восстанавливаем кнопки через интервал');
+        createTemplateButtons();
+    }
+}, 3000);
+
+// Наблюдатель за изменениями DOM
+var observer = new MutationObserver(function(mutations) {
+    var shouldRestore = false;
+    
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList') {
+            // Проверяем, если что-то было удалено или добавлено в области текстового редактора
+            if (mutation.target && (
+                mutation.target.classList.contains('text-area-box') ||
+                mutation.target.classList.contains('attach-first') ||
+                $(mutation.target).parents('.text-area-box').length > 0
+            )) {
+                shouldRestore = true;
+            }
+        }
+    });
+    
+    if (shouldRestore) {
+        setTimeout(function() {
+            if ($('.attach-first').length > 0 && $('#macroButtonsContainer').length === 0) {
+                console.log('Восстанавливаем кнопки через MutationObserver');
+                createTemplateButtons();
+            }
+        }, 100);
+    }
 });
 
-addButton(templateSelector, 328170, 'Каталог', {
-    'color': '#ac00ae', 
-    'text-decoration': 'none',
-    'margin-right': '10px', 
-    'font-size': '11px', 
-    'font-weight': '650',
-    'letter-spacing': '0.33px' 
+// Настраиваем наблюдатель
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
 });
 
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
