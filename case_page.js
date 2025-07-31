@@ -238,76 +238,159 @@ $(function() {
         true
     );
     /* БЫСТРЫЕ ШАБЛОНЫ */
+/* БЫСТРЫЕ ШАБЛОНЫ - ПРАВИЛЬНОЕ РАЗМЕЩЕНИЕ */
 
-    // Функция для добавления кнопок шаблонов
-    var TemplateButtons = {
-        initialized: false,
-        
-        init: function() {
-            // Защита от повторной инициализации
-            if (this.initialized) {
-                return;
-            }
-            
-            // Удаляем все существующие кнопки перед добавлением новых
-            $('[data-template]').remove();
-            $('#chatTemplateButtons, #emailTemplateButtons').remove();
-            
-            // Определяем тип страницы
-            if ($('.chat_msg_win_actions ul').length > 0) {
-                this.addChatTemplates();
-            } else if ($('.attach-first').length > 0) {
-                this.addEmailTemplates();
-            }
-            
-            this.initialized = true;
-        },
-
-        addChatTemplates: function() {
-            var chatContainer = $('.chat_msg_win_actions');
-            if (chatContainer.length > 0) {
-                // Добавляем кнопки как обычные inline ссылки ПОСЛЕ ul с иконками
-                var templateButtons = `
-                    <div style="display: inline-block; margin-left: 10px; margin-top: 8px;">
-                        <a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650; margin-right: 8px;">Акция</a>
-                        <a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650; margin-right: 8px;">Реализация</a>
-                        <a href="#" data-template="163903" style="color: #ac00ae; text-decoration: none; font-size: 11px; font-weight: 650;">Каталог</a>
-                    </div>
-                `;
-                chatContainer.find('ul').after(templateButtons);
-            }
-        },
-
-        addEmailTemplates: function() {
-            var attachFirst = $('.attach-first');
-            if (attachFirst.length > 0) {
-                // Добавляем кнопки в том же div что и "Прикрепить файл"
-                var templateButtons = `
-                    <div id="emailTemplateButtons" style="display: inline-flex; align-items: center; gap: 8px; margin-left: 15px;">
-                        <a href="#" data-template="210005" style="color: #e48000; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Акция 22</a>
-                        <a href="#" data-template="179994" style="color: #00868f; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Реализация</a>
-                        <a href="#" data-template="163903" style="color: #ac00ae; text-decoration: none; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Каталог</a>
-                    </div>
-                `;
-                attachFirst.append(templateButtons);
-            }
+// Функция для добавления кнопок шаблонов
+var TemplateButtons = {
+    initialized: false,
+    
+    init: function() {
+        // Защита от повторной инициализации
+        if (this.initialized) {
+            return;
         }
-    };
+        
+        // Удаляем все существующие кнопки перед добавлением новых
+        $('[data-template]').remove();
+        $('#templateButtons').remove();
+        
+        this.addEmailTemplates();
+        this.initialized = true;
+    },
 
-    // Обработчик клика по кнопкам шаблонов (один раз)
-    $(document).off('click', '[data-template]').on('click', '[data-template]', function(e) {
-        e.preventDefault();
-        var templateId = $(this).data('template');
-        $(`.apply-template[href="template_${templateId}"]`).click();
+    addEmailTemplates: function() {
+        var attachFirst = $('.attach-first');
+        if (attachFirst.length > 0) {
+            console.log('Добавляем кнопки шаблонов в .attach-first');
+            
+            // Добавляем кнопки ВНУТРИ .attach-first, чтобы они были в одну строку
+            var templateButtons = `
+                <div id="templateButtons" class="atach-items fl-left" style="margin-left: 15px;">
+                    <a href="#" data-template="327703" style="
+                        color: #e48000;
+                        text-decoration: none;
+                        margin-right: 10px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                    ">Акция</a>
+                    <a href="#" data-template="328169" style="
+                        color: #00868f;
+                        text-decoration: none;
+                        margin-right: 10px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                    ">Реализация</a>
+                    <a href="#" data-template="328170" style="
+                        color: #ac00ae;
+                        text-decoration: none;
+                        margin-right: 10px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                    ">Каталог</a>
+                </div>
+            `;
+            
+            // Добавляем ВНУТРИ .attach-first, после .attach-button
+            attachFirst.find('.attach-button').after(templateButtons);
+            
+            console.log('Кнопки шаблонов добавлены успешно');
+        } else {
+            console.log('Контейнер .attach-first не найден');
+        }
+    },
+    
+    // Функция восстановления кнопок
+    restore: function() {
+        var self = this;
+        var delays = [200, 500, 1000, 1500, 2000];
+        
+        delays.forEach(function(delay) {
+            setTimeout(function() {
+                if ($('#templateButtons').length === 0 && $('.attach-first').length > 0) {
+                    console.log('Восстанавливаем кнопки через', delay, 'ms');
+                    self.initialized = false;
+                    self.init();
+                }
+            }, delay);
+        });
+    }
+};
+
+// Обработчик клика по кнопкам шаблонов
+$(document).off('click', '[data-template]').on('click', '[data-template]', function(e) {
+    e.preventDefault();
+    var templateId = $(this).data('template');
+    console.log('Применяем шаблон:', templateId);
+    
+    // Применяем шаблон
+    $(`.apply-template[href="template_${templateId}"]`).click();
+    
+    // Запускаем восстановление кнопок
+    TemplateButtons.restore();
+});
+
+// Наблюдатель за изменениями DOM
+var setupTemplateObserver = function() {
+    var observer = new MutationObserver(function(mutations) {
+        var needRestore = false;
+        
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                var target = mutation.target;
+                if (target && (
+                    $(target).hasClass('attach-wrapper') ||
+                    $(target).hasClass('attach-first') ||
+                    $(target).hasClass('text-area-box') ||
+                    $(target).find('.attach-first').length > 0
+                )) {
+                    needRestore = true;
+                }
+            }
+        });
+        
+        if (needRestore && $('#templateButtons').length === 0) {
+            setTimeout(function() {
+                console.log('Восстанавливаем кнопки через MutationObserver');
+                TemplateButtons.initialized = false;
+                TemplateButtons.init();
+            }, 100);
+        }
     });
+    
+    // Наблюдаем за областью формы
+    var formContainer = $('.text-area-box, .answer-action-box').first();
+    if (formContainer.length > 0) {
+        observer.observe(formContainer[0], {
+            childList: true,
+            subtree: true
+        });
+    } else {
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+};
 
-    // Инициализация только один раз с небольшой задержкой
-    $(document).ready(function() {
-        setTimeout(function() { 
-            TemplateButtons.init(); 
-        }, 1000);
-    });
-
+// Инициализация с задержкой
+$(document).ready(function() {
+    setTimeout(function() { 
+        TemplateButtons.init();
+        setupTemplateObserver();
+        
+        // Дополнительная проверка каждые 5 секунд
+        setInterval(function() {
+            if ($('.attach-first').length > 0 && $('#templateButtons').length === 0) {
+                console.log('Восстанавливаем кнопки через интервал');
+                TemplateButtons.initialized = false;
+                TemplateButtons.init();
+            }
+        }, 5000);
+    }, 1000);
+});
 
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
 
