@@ -254,99 +254,56 @@ $(function() {
         true
     );
 
+/* БЫСТРЫЕ ШАБЛОНЫ - ПРОСТЫЕ ССЫЛКИ */
 
-/* БЫСТРЫЕ ШАБЛОНЫ - ПРАВИЛЬНОЕ РАЗМЕЩЕНИЕ */
-
-// Функция для создания кнопок в правильном месте
-var createInlineTemplateButtons = function() {
-    // Ищем стабильный контейнер для кнопок
+// Функция для создания простых ссылок рядом с "Прикрепить файл"
+var createSimpleTemplateButtons = function() {
+    // Ищем контейнер с кнопкой "Прикрепить файл"
     var attachContainer = $('.attach-wrapper, .attach-first').first();
     
     if (attachContainer.length === 0) {
-        // Если не нашли, ищем альтернативные места
+        // Альтернативные варианты поиска
         attachContainer = $('[data-name="case[content]"]').parent().find('.attach-wrapper').first();
         if (attachContainer.length === 0) {
             attachContainer = $('.text-area-box').find('.attach-wrapper').first();
         }
     }
     
-    if (attachContainer.length > 0 && $('#inlineTemplateButtons').length === 0) {
-        console.log('Добавляем кнопки шаблонов рядом с Прикрепить файл');
+    if (attachContainer.length > 0 && $('#simpleTemplateButtons').length === 0) {
+        console.log('Добавляем простые ссылки шаблонов');
         
-        // Добавляем контейнер для кнопок
+        // Добавляем простые ссылки
         attachContainer.append(`
-            <div id="inlineTemplateButtons" style="
-                display: inline-block;
-                margin-left: 15px;
-                vertical-align: top;
-            ">
-                <span style="
-                    color: #666;
-                    font-size: 11px;
-                    margin-right: 8px;
-                ">Шаблоны:</span>
-                <a href="#" class="inline-template-btn" data-template="327703" style="
+            <div id="simpleTemplateButtons" style="display: inline-block; margin-left: 15px; margin-top: 2px;">
+                <a href="#" class="simple-template-link" data-template="327703" style="
                     color: #e48000;
                     text-decoration: none;
-                    margin-right: 8px;
+                    margin-right: 10px;
                     font-size: 11px;
                     font-weight: 650;
                     letter-spacing: 0.33px;
-                    padding: 2px 5px;
-                    border-radius: 3px;
-                    background: #fff5e6;
-                    border: 1px solid #e48000;
-                    transition: all 0.2s ease;
                 ">Акция</a>
-                <a href="#" class="inline-template-btn" data-template="328169" style="
+                <a href="#" class="simple-template-link" data-template="328169" style="
                     color: #00868f;
                     text-decoration: none;
-                    margin-right: 8px;
+                    margin-right: 10px;
                     font-size: 11px;
                     font-weight: 650;
                     letter-spacing: 0.33px;
-                    padding: 2px 5px;
-                    border-radius: 3px;
-                    background: #e6f7f8;
-                    border: 1px solid #00868f;
-                    transition: all 0.2s ease;
                 ">Реализация</a>
-                <a href="#" class="inline-template-btn" data-template="328170" style="
+                <a href="#" class="simple-template-link" data-template="328170" style="
                     color: #ac00ae;
                     text-decoration: none;
+                    margin-right: 10px;
                     font-size: 11px;
                     font-weight: 650;
                     letter-spacing: 0.33px;
-                    padding: 2px 5px;
-                    border-radius: 3px;
-                    background: #f8e6f8;
-                    border: 1px solid #ac00ae;
-                    transition: all 0.2s ease;
                 ">Каталог</a>
             </div>
         `);
         
-        // Добавляем стили для эффектов
-        $('<style>').prop('type', 'text/css').html(`
-            .inline-template-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-                opacity: 0.9;
-            }
-            .inline-template-btn:active {
-                transform: translateY(0);
-                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            }
-            .inline-template-btn.applying {
-                background: #4CAF50 !important;
-                color: white !important;
-                border-color: #4CAF50 !important;
-            }
-        `).appendTo('head');
-        
         // Привязываем события
-        bindInlineTemplateEvents();
-        
+        bindSimpleTemplateEvents();
         return true;
     }
     
@@ -354,80 +311,63 @@ var createInlineTemplateButtons = function() {
 };
 
 // Функция привязки событий
-var bindInlineTemplateEvents = function() {
-    // Используем делегирование событий для надежности
-    $(document).off('click', '.inline-template-btn');
-    $(document).on('click', '.inline-template-btn', function(e) {
+var bindSimpleTemplateEvents = function() {
+    $(document).off('click', '.simple-template-link');
+    $(document).on('click', '.simple-template-link', function(e) {
         e.preventDefault();
         
-        var $btn = $(this);
-        var templateId = $btn.data('template');
-        var templateName = $btn.text();
-        
-        console.log('Применяем шаблон:', templateName, templateId);
-        
-        // Визуальная обратная связь
-        $btn.addClass('applying').text('Применяю...');
+        var templateId = $(this).data('template');
+        console.log('Применяем шаблон:', templateId);
         
         // Применяем шаблон
         $(`.apply-template[href="template_${templateId}"]`).click();
         
-        // Восстанавливаем кнопку через короткое время
-        setTimeout(function() {
-            $btn.removeClass('applying').text(templateName);
-        }, 1000);
-        
-        // Запускаем восстановление кнопок
-        scheduleButtonRestoration();
+        // Восстанавливаем ссылки после применения
+        restoreSimpleButtons();
     });
 };
 
-// Функция планирования восстановления кнопок
-var scheduleButtonRestoration = function() {
-    // Множественные попытки восстановления
-    var delays = [100, 300, 500, 800, 1200, 2000];
+// Функция восстановления ссылок
+var restoreSimpleButtons = function() {
+    var delays = [200, 500, 1000, 1500, 2000];
     
     delays.forEach(function(delay) {
         setTimeout(function() {
-            if ($('#inlineTemplateButtons').length === 0) {
-                console.log('Восстанавливаем кнопки через', delay, 'ms');
-                createInlineTemplateButtons();
+            if ($('#simpleTemplateButtons').length === 0) {
+                console.log('Восстанавливаем ссылки через', delay, 'ms');
+                createSimpleTemplateButtons();
             }
         }, delay);
     });
 };
 
-// Наблюдатель за изменениями DOM (улучшенная версия)
-var setupAdvancedObserver = function() {
+// Наблюдатель за изменениями DOM
+var setupSimpleObserver = function() {
     var observer = new MutationObserver(function(mutations) {
-        var shouldRestore = false;
+        var needRestore = false;
         
         mutations.forEach(function(mutation) {
             if (mutation.type === 'childList') {
-                // Проверяем, затронута ли область с кнопками
                 var target = mutation.target;
-                
                 if (target && (
                     $(target).hasClass('attach-wrapper') ||
                     $(target).hasClass('attach-first') ||
                     $(target).hasClass('text-area-box') ||
-                    $(target).find('.attach-wrapper').length > 0 ||
-                    mutation.removedNodes.length > 0
+                    $(target).find('.attach-wrapper').length > 0
                 )) {
-                    shouldRestore = true;
+                    needRestore = true;
                 }
             }
         });
         
-        if (shouldRestore && $('#inlineTemplateButtons').length === 0) {
+        if (needRestore && $('#simpleTemplateButtons').length === 0) {
             setTimeout(function() {
-                console.log('Восстанавливаем кнопки через MutationObserver');
-                createInlineTemplateButtons();
-            }, 50);
+                createSimpleTemplateButtons();
+            }, 100);
         }
     });
     
-    // Наблюдаем за областью формы
+    // Наблюдаем за формой
     var formContainer = $('.text-area-box, .message-form').first();
     if (formContainer.length > 0) {
         observer.observe(formContainer[0], {
@@ -435,7 +375,6 @@ var setupAdvancedObserver = function() {
             subtree: true
         });
     } else {
-        // Fallback - наблюдаем за всем документом
         observer.observe(document.body, {
             childList: true,
             subtree: true
@@ -447,41 +386,27 @@ var setupAdvancedObserver = function() {
 
 // Инициализация
 $(document).ready(function() {
-    // Небольшая задержка для загрузки DOM
     setTimeout(function() {
-        console.log('Инициализация кнопок шаблонов');
-        
-        // Создаем кнопки
-        var created = createInlineTemplateButtons();
+        var created = createSimpleTemplateButtons();
         
         if (created) {
-            // Настраиваем наблюдатель
-            setupAdvancedObserver();
+            setupSimpleObserver();
             
-            // Дополнительная защита - периодическая проверка
+            // Дополнительная проверка каждые 5 сек
             setInterval(function() {
-                if ($('.attach-wrapper, .attach-first').length > 0 && $('#inlineTemplateButtons').length === 0) {
-                    console.log('Восстанавливаем кнопки через интервал');
-                    createInlineTemplateButtons();
+                if ($('.attach-wrapper, .attach-first').length > 0 && $('#simpleTemplateButtons').length === 0) {
+                    createSimpleTemplateButtons();
                 }
             }, 5000);
         } else {
-            console.log('Не удалось найти место для размещения кнопок, повторная попытка через 2 сек');
+            // Повторная попытка через 2 сек
             setTimeout(function() {
-                createInlineTemplateButtons();
-                setupAdvancedObserver();
+                createSimpleTemplateButtons();
+                setupSimpleObserver();
             }, 2000);
         }
     }, 1000);
 });
-
-// Удаляем кнопки из боковой панели если они там есть
-$(document).ready(function() {
-    setTimeout(function() {
-        $('.quick-template-btn').parent().parent().remove();
-    }, 500);
-});
-
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
 
     // Сначала добавляем название блока
