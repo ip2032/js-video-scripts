@@ -254,150 +254,232 @@ $(function() {
         true
     );
 
-    
+
 /* БЫСТРЫЕ ШАБЛОНЫ */
 
-// Функция для создания кнопок
-var createTemplateButtons = function() {
-    // Удаляем старый контейнер если он есть
-    $('#macroButtonsContainer').remove();
+// Создаем кнопки в другом месте, которое не перезагружается при применении шаблонов
+var createPersistentTemplateButtons = function() {
+    // Ищем более стабильное место для размещения кнопок
+    var targetSelector = '.case-form-actions, .form-actions, .text-area-box, .message-form';
+    var $target = $(targetSelector).first();
     
-    // Проверяем, есть ли контейнер для кнопок
-    if ($('.attach-first').length === 0) {
-        return; // Если нет контейнера, выходим
+    if ($target.length === 0) {
+        console.log('Целевой контейнер не найден, пробуем альтернативные места');
+        // Пробуем другие места
+        $target = $('.attach-wrapper').parent();
+        if ($target.length === 0) {
+            $target = $('textarea[name="case[content]"]').parent();
+        }
     }
     
-    // Создаем новый контейнер
-    addCode(
-        '.attach-first', 
-        '<div id="macroButtonsContainer" style="display: inline-block; margin-left: 15px; margin-top: 2px;"></div>',
-        true
-    );
-
-    var templateSelector = '#macroButtonsContainer';
-
-    // Добавляем кнопки
-    addButton(templateSelector, 327703, 'Акция', { 
-        'color': '#e48000',
-        'text-decoration': 'none',
-        'margin-right': '10px',
-        'font-size': '11px',
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
-    });
-    
-    addButton(templateSelector, 328169, 'Реализация', {
-        'color': '#00868f',
-        'text-decoration': 'none',
-        'margin-right': '10px',
-        'font-size': '11px',
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
-    });
-
-    addButton(templateSelector, 328170, 'Каталог', {
-        'color': '#ac00ae', 
-        'text-decoration': 'none',
-        'margin-right': '10px', 
-        'font-size': '11px', 
-        'font-weight': '650',
-        'letter-spacing': '0.33px' 
-    });
+    if ($target.length > 0 && $('#persistentMacroButtons').length === 0) {
+        console.log('Добавляем постоянные кнопки шаблонов');
+        
+        // Создаем контейнер с фиксированной позицией
+        var buttonsHtml = `
+            <div id="persistentMacroButtons" style="
+                position: fixed;
+                top: 150px;
+                right: 20px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 9999;
+                font-family: Arial, sans-serif;
+            ">
+                <div style="font-size: 11px; color: #666; margin-bottom: 5px; font-weight: bold;">Шаблоны:</div>
+                <div>
+                    <a href="#" id="persistentButton_327703" style="
+                        display: inline-block;
+                        color: #e48000;
+                        text-decoration: none;
+                        margin-right: 8px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                        background: #fff5e6;
+                        border: 1px solid #e48000;
+                    ">Акция</a>
+                    <a href="#" id="persistentButton_328169" style="
+                        display: inline-block;
+                        color: #00868f;
+                        text-decoration: none;
+                        margin-right: 8px;
+                        font-size: 11px;
+                        font-weight: 650;
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                        background: #e6f7f8;
+                        border: 1px solid #00868f;
+                    ">Реализация</a>
+                    <a href="#" id="persistentButton_328170" style="
+                        display: inline-block;
+                        color: #ac00ae;
+                        text-decoration: none;
+                        font-size: 11px;
+                        font-weight: 650;
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                        background: #f8e6f8;
+                        border: 1px solid #ac00ae;
+                    ">Каталог</a>
+                </div>
+                <div style="margin-top: 5px;">
+                    <a href="#" id="hidePersistentButtons" style="
+                        font-size: 10px;
+                        color: #999;
+                        text-decoration: none;
+                    ">скрыть</a>
+                </div>
+            </div>
+        `;
+        
+        $('body').append(buttonsHtml);
+        
+        // Привязываем события
+        bindPersistentEvents();
+        
+        console.log('Постоянные кнопки добавлены');
+    }
 };
 
-// По клику находим ID шаблона, и применяем его, подставляя ID
-var handleMacroClick = function(templateId) {
-    // Используем делегирование событий для избежания дублирования
-    $(document).off('click', `#applyMacroButton_${templateId}`);
-    $(document).on('click', `#applyMacroButton_${templateId}`, function(e) {
+// Функция для привязки событий к постоянным кнопкам
+var bindPersistentEvents = function() {
+    // Обработчики для кнопок шаблонов
+    $('#persistentButton_327703').on('click', function(e) {
         e.preventDefault();
-        console.log('Применяем шаблон:', templateId);
-        
-        // Применяем шаблон по клику на ссылку  
-        $(`.apply-template[href="template_${templateId}"]`).click();
-        
-        // Восстанавливаем кнопки через несколько попыток с разными интервалами
-        setTimeout(function() {
-            console.log('Попытка восстановления 1 (500ms)');
-            if ($('#macroButtonsContainer').length === 0) {
-                createTemplateButtons();
-            }
-        }, 500);
-        
-        setTimeout(function() {
-            console.log('Попытка восстановления 2 (1000ms)');
-            if ($('#macroButtonsContainer').length === 0) {
-                createTemplateButtons();
-            }
-        }, 1000);
-        
-        setTimeout(function() {
-            console.log('Попытка восстановления 3 (2000ms)');
-            if ($('#macroButtonsContainer').length === 0) {
-                createTemplateButtons();
-            }
-        }, 2000);
+        console.log('Применяем шаблон: Акция (327703)');
+        $(`.apply-template[href="template_327703"]`).click();
+        // Подсвечиваем примененную кнопку
+        $(this).css('background', '#ffe0b3').animate({backgroundColor: '#fff5e6'}, 1000);
     });
-};
-
-// Выносим ссылки для быстрого применения шаблона и стилизуем их
-var addButton = function(containerSelector, templateId, buttonText, styles) {
-    var buttonId = `applyMacroButton_${templateId}`;
-    var buttonHtml = `<a id="${buttonId}" href="#">${buttonText}</a>`;
-    addCode(containerSelector, buttonHtml, true);
-    handleMacroClick(templateId);
-    applyStyles(`#${buttonId}`, styles);
-};
-
-// Создаем функцию для стилизации ссылок
-var applyStyles = function(selector, styles) {
-    $(selector).css(styles);
-};
-
-// Создаем кнопки при загрузке
-$(document).ready(function() {
-    createTemplateButtons();
-});
-
-// Дополнительная защита - проверяем каждые 3 секунды
-setInterval(function() {
-    if ($('.attach-first').length > 0 && $('#macroButtonsContainer').length === 0) {
-        console.log('Восстанавливаем кнопки через интервал');
-        createTemplateButtons();
-    }
-}, 3000);
-
-// Наблюдатель за изменениями DOM
-var observer = new MutationObserver(function(mutations) {
-    var shouldRestore = false;
     
-    mutations.forEach(function(mutation) {
-        if (mutation.type === 'childList') {
-            // Проверяем, если что-то было удалено или добавлено в области текстового редактора
-            if (mutation.target && (
-                mutation.target.classList.contains('text-area-box') ||
-                mutation.target.classList.contains('attach-first') ||
-                $(mutation.target).parents('.text-area-box').length > 0
-            )) {
-                shouldRestore = true;
-            }
+    $('#persistentButton_328169').on('click', function(e) {
+        e.preventDefault();
+        console.log('Применяем шаблон: Реализация (328169)');
+        $(`.apply-template[href="template_328169"]`).click();
+        $(this).css('background', '#b3f0f2').animate({backgroundColor: '#e6f7f8'}, 1000);
+    });
+    
+    $('#persistentButton_328170').on('click', function(e) {
+        e.preventDefault();
+        console.log('Применяем шаблон: Каталог (328170)');
+        $(`.apply-template[href="template_328170"]`).click();
+        $(this).css('background', '#e6b3e6').animate({backgroundColor: '#f8e6f8'}, 1000);
+    });
+    
+    // Кнопка скрытия
+    $('#hidePersistentButtons').on('click', function(e) {
+        e.preventDefault();
+        $('#persistentMacroButtons').fadeOut();
+        
+        // Создаем маленькую кнопку для показа
+        if ($('#showPersistentButtons').length === 0) {
+            $('body').append(`
+                <div id="showPersistentButtons" style="
+                    position: fixed;
+                    top: 150px;
+                    right: 20px;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 15px;
+                    padding: 5px 10px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    z-index: 9999;
+                    cursor: pointer;
+                    font-size: 11px;
+                ">📝</div>
+            `);
+            
+            $('#showPersistentButtons').on('click', function() {
+                $('#persistentMacroButtons').fadeIn();
+                $(this).remove();
+            });
         }
     });
-    
-    if (shouldRestore) {
-        setTimeout(function() {
-            if ($('.attach-first').length > 0 && $('#macroButtonsContainer').length === 0) {
-                console.log('Восстанавливаем кнопки через MutationObserver');
-                createTemplateButtons();
-            }
-        }, 100);
-    }
-});
+};
 
-// Настраиваем наблюдатель
-observer.observe(document.body, {
-    childList: true,
-    subtree: true
+// Альтернативный подход - кнопки в боковой панели
+var createSidebarButtons = function() {
+    if ($('#sidebarMacroButtons').length === 0 && ($('#info_user_info_panel').length > 0 || $('#integrations_info_panel').length > 0)) {
+        var targetPanel = $('#info_user_info_panel').length > 0 ? '#info_user_info_panel' : '#integrations_info_panel';
+        
+        $(targetPanel).prepend(`
+            <div id="sidebarMacroButtons" class="info_header clearfix" style="background: #f8f9fa; border: 1px solid #e9ecef; margin-bottom: 10px;">
+                <p style="margin: 0; padding: 5px; font-weight: bold; font-size: 12px;">Быстрые шаблоны:</p>
+                <div style="padding: 5px;">
+                    <a href="#" id="sidebarButton_327703" style="
+                        display: inline-block;
+                        color: #e48000;
+                        text-decoration: none;
+                        margin-right: 5px;
+                        margin-bottom: 3px;
+                        font-size: 10px;
+                        font-weight: 650;
+                        padding: 3px 6px;
+                        border-radius: 3px;
+                        background: #fff5e6;
+                        border: 1px solid #e48000;
+                    ">Акция</a>
+                    <a href="#" id="sidebarButton_328169" style="
+                        display: inline-block;
+                        color: #00868f;
+                        text-decoration: none;
+                        margin-right: 5px;
+                        margin-bottom: 3px;
+                        font-size: 10px;
+                        font-weight: 650;
+                        padding: 3px 6px;
+                        border-radius: 3px;
+                        background: #e6f7f8;
+                        border: 1px solid #00868f;
+                    ">Реализация</a>
+                    <a href="#" id="sidebarButton_328170" style="
+                        display: inline-block;
+                        color: #ac00ae;
+                        text-decoration: none;
+                        margin-bottom: 3px;
+                        font-size: 10px;
+                        font-weight: 650;
+                        padding: 3px 6px;
+                        border-radius: 3px;
+                        background: #f8e6f8;
+                        border: 1px solid #ac00ae;
+                    ">Каталог</a>
+                </div>
+            </div>
+        `);
+        
+        // Привязываем события для боковых кнопок
+        $('#sidebarButton_327703').on('click', function(e) {
+            e.preventDefault();
+            $(`.apply-template[href="template_327703"]`).click();
+        });
+        
+        $('#sidebarButton_328169').on('click', function(e) {
+            e.preventDefault();
+            $(`.apply-template[href="template_328169"]`).click();
+        });
+        
+        $('#sidebarButton_328170').on('click', function(e) {
+            e.preventDefault();
+            $(`.apply-template[href="template_328170"]`).click();
+        });
+        
+        console.log('Кнопки в боковой панели добавлены');
+    }
+};
+
+// Инициализация
+$(document).ready(function() {
+    setTimeout(function() {
+        // Создаем оба варианта - пользователь может выбрать какой ему больше нравится
+        createPersistentTemplateButtons();
+        createSidebarButtons();
+    }, 1500);
 });
 
     /* КАЛЬКУЛЯТОР ПОДСЧЕТ СТОИМОСТИ */
