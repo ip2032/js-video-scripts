@@ -253,244 +253,228 @@ $(function() {
         </div>`,
         true
     );
+/* БЫСТРЫЕ ШАБЛОНЫ - ФИНАЛЬНАЯ ВЕРСИЯ БЕЗ КОНФЛИКТОВ */
 
-/* БЫСТРЫЕ ШАБЛОНЫ - В ОДНУ СТРОКУ */
-
-// Функция для создания ссылок в одну строку с "Прикрепить файл"
-var createInlineTemplateButtons = function() {
-    // Ищем точный элемент с "Прикрепить файл"
-    var attachElement = $('a[href*="attach"], a:contains("Прикрепить файл"), .attach-file, #attach_file').first();
+// Функция для добавления кнопок шаблонов
+var TemplateButtons = {
+    initialized: false,
     
-    if (attachElement.length === 0) {
-        // Ищем по иконке прикрепления
-        attachElement = $('i.icon-paperclip, i.fa-paperclip, i[class*="attach"]').closest('a').first();
-    }
-    
-    if (attachElement.length === 0) {
-        // Ищем контейнер и добавляем туда
-        attachElement = $('.attach-wrapper, .attach-first').first();
-    }
-    
-    if (attachElement.length > 0 && $('#inlineTemplateLinks').length === 0) {
-        console.log('Добавляем ссылки в одну строку с Прикрепить файл');
-        
-        // Добавляем ссылки сразу после элемента "Прикрепить файл"
-        attachElement.after(`
-            <span id="inlineTemplateLinks" style="margin-left: 15px;">
-                <a href="#" class="template-link" data-template="327703" style="
-                    color: #e48000;
-                    text-decoration: none;
-                    margin-right: 10px;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                ">Акция</a><a href="#" class="template-link" data-template="328169" style="
-                    color: #00868f;
-                    text-decoration: none;
-                    margin-right: 10px;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                ">Реализация</a><a href="#" class="template-link" data-template="328170" style="
-                    color: #ac00ae;
-                    text-decoration: none;
-                    margin-right: 10px;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                ">Каталог</a>
-            </span>
-        `);
-        
-        // Если не получилось добавить после элемента, пробуем добавить внутрь контейнера
-        if ($('#inlineTemplateLinks').length === 0) {
-            var container = attachElement.parent();
-            if (container.length > 0) {
-                // Убеждаемся что контейнер имеет flex или inline стили
-                container.css({
-                    'display': 'flex',
-                    'align-items': 'center',
-                    'flex-wrap': 'nowrap'
-                });
-                
-                container.append(`
-                    <span id="inlineTemplateLinks" style="margin-left: 15px;">
-                        <a href="#" class="template-link" data-template="327703" style="
-                            color: #e48000;
-                            text-decoration: none;
-                            margin-right: 10px;
-                            font-size: 11px;
-                            font-weight: 650;
-                            letter-spacing: 0.33px;
-                        ">Акция</a><a href="#" class="template-link" data-template="328169" style="
-                            color: #00868f;
-                            text-decoration: none;
-                            margin-right: 10px;
-                            font-size: 11px;
-                            font-weight: 650;
-                            letter-spacing: 0.33px;
-                        ">Реализация</a><a href="#" class="template-link" data-template="328170" style="
-                            color: #ac00ae;
-                            text-decoration: none;
-                            margin-right: 10px;
-                            font-size: 11px;
-                            font-weight: 650;
-                            letter-spacing: 0.33px;
-                        ">Каталог</a>
-                    </span>
-                `);
-            }
+    init: function() {
+        // Защита от повторной инициализации
+        if (this.initialized) {
+            return;
         }
         
-        bindInlineEvents();
-        return true;
-    }
-    
-    return false;
-};
-
-// Альтернативный способ - поиск по селекторам из старого кода
-var createTemplateButtonsAlternative = function() {
-    // Используем селектор из исходного кода
-    var buttonContainerSelector = '.attach-first';
-    var $container = $(buttonContainerSelector);
-    
-    if ($container.length > 0 && $('#alternativeTemplateLinks').length === 0) {
-        console.log('Используем альтернативный способ размещения');
+        // Удаляем все существующие кнопки
+        $('#templateButtons, #macroButtonsContainer, #simpleTemplateButtons').remove();
         
-        // Делаем контейнер flex для размещения в одну строку
-        $container.css({
-            'display': 'flex !important',
-            'align-items': 'center !important',
-            'flex-wrap': 'nowrap !important'
+        this.addTemplateButtons();
+        this.initialized = true;
+    },
+
+    addTemplateButtons: function() {
+        // Ищем контейнер .attach-first
+        var attachFirst = $('.attach-first');
+        if (attachFirst.length > 0) {
+            console.log('Добавляем кнопки шаблонов');
+            
+            // Делаем родительский контейнер flex для размещения в одну строку
+            attachFirst.parent().css({
+                'display': 'flex',
+                'align-items': 'center',
+                'flex-wrap': 'nowrap'
+            });
+            
+            // Добавляем кнопки ПОСЛЕ .attach-first, но в том же контейнере
+            var templateButtons = `
+                <div id="templateButtons" style="
+                    display: flex;
+                    align-items: center;
+                    margin-left: 15px;
+                    gap: 10px;
+                ">
+                    <a href="#" class="template-btn" data-template="327703" style="
+                        color: #e48000;
+                        text-decoration: none;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                        padding: 2px 4px;
+                        border-radius: 2px;
+                        display: inline-block;
+                    ">Акция</a>
+                    <a href="#" class="template-btn" data-template="328169" style="
+                        color: #00868f;
+                        text-decoration: none;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                        padding: 2px 4px;
+                        border-radius: 2px;
+                        display: inline-block;
+                    ">Реализация</a>
+                    <a href="#" class="template-btn" data-template="328170" style="
+                        color: #ac00ae;
+                        text-decoration: none;
+                        font-size: 11px;
+                        font-weight: 650;
+                        letter-spacing: 0.33px;
+                        padding: 2px 4px;
+                        border-radius: 2px;
+                        display: inline-block;
+                    ">Каталог</a>
+                </div>
+            `;
+            
+            // Добавляем ПОСЛЕ .attach-first
+            attachFirst.after(templateButtons);
+            
+            console.log('Кнопки шаблонов добавлены успешно');
+            return true;
+        } else {
+            console.log('Контейнер .attach-first не найден');
+            return false;
+        }
+    },
+    
+    // Функция восстановления кнопок
+    restore: function() {
+        var self = this;
+        console.log('Запускаем восстановление кнопок');
+        
+        // Множественные попытки восстановления
+        var delays = [100, 300, 500, 800, 1200, 2000, 3000];
+        
+        delays.forEach(function(delay) {
+            setTimeout(function() {
+                if ($('#templateButtons').length === 0 && $('.attach-first').length > 0) {
+                    console.log('Восстанавливаем кнопки через', delay, 'ms');
+                    self.initialized = false;
+                    self.init();
+                }
+            }, delay);
         });
-        
-        // Добавляем ссылки
-        $container.append(`
-            <span id="alternativeTemplateLinks" style="
-                display: inline-flex;
-                align-items: center;
-                margin-left: 15px;
-                gap: 10px;
-            ">
-                <a href="#" class="template-link" data-template="327703" style="
-                    color: #e48000;
-                    text-decoration: none;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                ">Акция</a><a href="#" class="template-link" data-template="328169" style="
-                    color: #00868f;
-                    text-decoration: none;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                ">Реализация</a><a href="#" class="template-link" data-template="328170" style="
-                    color: #ac00ae;
-                    text-decoration: none;
-                    font-size: 11px;
-                    font-weight: 650;
-                    letter-spacing: 0.33px;
-                ">Каталог</a>
-            </span>
-        `);
-        
-        bindInlineEvents();
-        return true;
     }
+};
+
+// Обработчик клика по кнопкам шаблонов с предотвращением всплытия
+$(document).off('click', '.template-btn').on('click', '.template-btn', function(e) {
+    // КРИТИЧЕСКИ ВАЖНО: предотвращаем все формы всплытия события
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
     
+    var templateId = $(this).data('template');
+    var templateName = $(this).text();
+    
+    console.log('Применяем шаблон:', templateName, templateId);
+    
+    // Визуальная обратная связь
+    $(this).css('opacity', '0.5').text('Применяю...');
+    
+    // Применяем шаблон
+    $(`.apply-template[href="template_${templateId}"]`).click();
+    
+    // Восстанавливаем текст кнопки
+    var $btn = $(this);
+    setTimeout(function() {
+        $btn.css('opacity', '1').text(templateName);
+    }, 1000);
+    
+    // Запускаем восстановление кнопок
+    TemplateButtons.restore();
+    
+    // Возвращаем false для дополнительной защиты
     return false;
-};
+});
 
-// Функция привязки событий
-var bindInlineEvents = function() {
-    $(document).off('click', '.template-link');
-    $(document).on('click', '.template-link', function(e) {
-        e.preventDefault();
-        
-        var templateId = $(this).data('template');
-        console.log('Применяем шаблон:', templateId);
-        
-        $(`.apply-template[href="template_${templateId}"]`).click();
-        
-        // Восстанавливаем ссылки
-        restoreInlineButtons();
-    });
-};
-
-// Функция восстановления
-var restoreInlineButtons = function() {
-    var delays = [200, 500, 1000, 1500, 2000];
-    
-    delays.forEach(function(delay) {
-        setTimeout(function() {
-            if ($('#inlineTemplateLinks').length === 0 && $('#alternativeTemplateLinks').length === 0) {
-                console.log('Восстанавливаем ссылки через', delay, 'ms');
-                createInlineTemplateButtons() || createTemplateButtonsAlternative();
-            }
-        }, delay);
-    });
-};
-
-// Наблюдатель
-var setupInlineObserver = function() {
+// Улучшенный наблюдатель за изменениями DOM
+var setupTemplateObserver = function() {
     var observer = new MutationObserver(function(mutations) {
         var needRestore = false;
         
         mutations.forEach(function(mutation) {
             if (mutation.type === 'childList') {
                 var target = mutation.target;
+                
+                // Проверяем различные сценарии когда могут исчезнуть кнопки
                 if (target && (
                     $(target).hasClass('attach-wrapper') ||
                     $(target).hasClass('attach-first') ||
                     $(target).hasClass('text-area-box') ||
-                    $(target).find('.attach-wrapper, .attach-first').length > 0
+                    $(target).hasClass('answer-action-box') ||
+                    $(target).find('.attach-first').length > 0 ||
+                    // Проверяем если были удалены узлы
+                    mutation.removedNodes.length > 0
                 )) {
                     needRestore = true;
                 }
             }
         });
         
-        if (needRestore && $('#inlineTemplateLinks').length === 0 && $('#alternativeTemplateLinks').length === 0) {
+        if (needRestore && $('#templateButtons').length === 0) {
             setTimeout(function() {
-                createInlineTemplateButtons() || createTemplateButtonsAlternative();
-            }, 100);
+                if ($('.attach-first').length > 0) {
+                    console.log('Восстанавливаем кнопки через MutationObserver');
+                    TemplateButtons.initialized = false;
+                    TemplateButtons.init();
+                }
+            }, 50);
         }
     });
     
-    var formContainer = $('.text-area-box, .message-form').first();
-    if (formContainer.length > 0) {
-        observer.observe(formContainer[0], {
+    // Наблюдаем за областью с формой
+    var containers = ['.text-area-box', '.answer-action-box', '.attach-wrapper'];
+    var targetContainer = null;
+    
+    for (var i = 0; i < containers.length; i++) {
+        var container = $(containers[i]).first();
+        if (container.length > 0) {
+            targetContainer = container[0];
+            break;
+        }
+    }
+    
+    if (targetContainer) {
+        observer.observe(targetContainer, {
             childList: true,
             subtree: true
         });
+        console.log('MutationObserver настроен для:', targetContainer.className);
     } else {
+        // Fallback - наблюдаем за всем документом
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
+        console.log('MutationObserver настроен для document.body (fallback)');
     }
 };
 
 // Инициализация
 $(document).ready(function() {
-    setTimeout(function() {
-        var created = createInlineTemplateButtons() || createTemplateButtonsAlternative();
+    setTimeout(function() { 
+        var success = TemplateButtons.init();
         
-        if (created) {
-            setupInlineObserver();
+        if (success) {
+            setupTemplateObserver();
             
+            // Дополнительная защита - проверка каждые 5 секунд
             setInterval(function() {
-                if ($('.attach-wrapper, .attach-first').length > 0 && 
-                    $('#inlineTemplateLinks').length === 0 && 
-                    $('#alternativeTemplateLinks').length === 0) {
-                    createInlineTemplateButtons() || createTemplateButtonsAlternative();
+                if ($('.attach-first').length > 0 && $('#templateButtons').length === 0) {
+                    console.log('Восстанавливаем кнопки через интервал (5 сек)');
+                    TemplateButtons.initialized = false;
+                    TemplateButtons.init();
                 }
             }, 5000);
+            
+            console.log('Система кнопок шаблонов инициализирована успешно');
         } else {
+            // Повторная попытка через 2 секунды
             setTimeout(function() {
-                createInlineTemplateButtons() || createTemplateButtonsAlternative();
-                setupInlineObserver();
+                console.log('Повторная попытка инициализации через 2 сек');
+                TemplateButtons.init();
+                setupTemplateObserver();
             }, 2000);
         }
     }, 1000);
