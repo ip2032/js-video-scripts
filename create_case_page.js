@@ -254,44 +254,44 @@ $(function() {
         true
     );
 
-/* БЫСТРЫЕ ШАБЛОНЫ - ПРОСТЫЕ ССЫЛКИ */
+/* БЫСТРЫЕ ШАБЛОНЫ - В ОДНУ СТРОКУ */
 
-// Функция для создания простых ссылок рядом с "Прикрепить файл"
-var createSimpleTemplateButtons = function() {
-    // Ищем контейнер с кнопкой "Прикрепить файл"
-    var attachContainer = $('.attach-wrapper, .attach-first').first();
+// Функция для создания ссылок в одну строку с "Прикрепить файл"
+var createInlineTemplateButtons = function() {
+    // Ищем точный элемент с "Прикрепить файл"
+    var attachElement = $('a[href*="attach"], a:contains("Прикрепить файл"), .attach-file, #attach_file').first();
     
-    if (attachContainer.length === 0) {
-        // Альтернативные варианты поиска
-        attachContainer = $('[data-name="case[content]"]').parent().find('.attach-wrapper').first();
-        if (attachContainer.length === 0) {
-            attachContainer = $('.text-area-box').find('.attach-wrapper').first();
-        }
+    if (attachElement.length === 0) {
+        // Ищем по иконке прикрепления
+        attachElement = $('i.icon-paperclip, i.fa-paperclip, i[class*="attach"]').closest('a').first();
     }
     
-    if (attachContainer.length > 0 && $('#simpleTemplateButtons').length === 0) {
-        console.log('Добавляем простые ссылки шаблонов');
+    if (attachElement.length === 0) {
+        // Ищем контейнер и добавляем туда
+        attachElement = $('.attach-wrapper, .attach-first').first();
+    }
+    
+    if (attachElement.length > 0 && $('#inlineTemplateLinks').length === 0) {
+        console.log('Добавляем ссылки в одну строку с Прикрепить файл');
         
-        // Добавляем простые ссылки
-        attachContainer.append(`
-            <div id="simpleTemplateButtons" style="display: inline-block; margin-left: 15px; margin-top: 2px;">
-                <a href="#" class="simple-template-link" data-template="327703" style="
+        // Добавляем ссылки сразу после элемента "Прикрепить файл"
+        attachElement.after(`
+            <span id="inlineTemplateLinks" style="margin-left: 15px;">
+                <a href="#" class="template-link" data-template="327703" style="
                     color: #e48000;
                     text-decoration: none;
                     margin-right: 10px;
                     font-size: 11px;
                     font-weight: 650;
                     letter-spacing: 0.33px;
-                ">Акция</a>
-                <a href="#" class="simple-template-link" data-template="328169" style="
+                ">Акция</a><a href="#" class="template-link" data-template="328169" style="
                     color: #00868f;
                     text-decoration: none;
                     margin-right: 10px;
                     font-size: 11px;
                     font-weight: 650;
                     letter-spacing: 0.33px;
-                ">Реализация</a>
-                <a href="#" class="simple-template-link" data-template="328170" style="
+                ">Реализация</a><a href="#" class="template-link" data-template="328170" style="
                     color: #ac00ae;
                     text-decoration: none;
                     margin-right: 10px;
@@ -299,11 +299,103 @@ var createSimpleTemplateButtons = function() {
                     font-weight: 650;
                     letter-spacing: 0.33px;
                 ">Каталог</a>
-            </div>
+            </span>
         `);
         
-        // Привязываем события
-        bindSimpleTemplateEvents();
+        // Если не получилось добавить после элемента, пробуем добавить внутрь контейнера
+        if ($('#inlineTemplateLinks').length === 0) {
+            var container = attachElement.parent();
+            if (container.length > 0) {
+                // Убеждаемся что контейнер имеет flex или inline стили
+                container.css({
+                    'display': 'flex',
+                    'align-items': 'center',
+                    'flex-wrap': 'nowrap'
+                });
+                
+                container.append(`
+                    <span id="inlineTemplateLinks" style="margin-left: 15px;">
+                        <a href="#" class="template-link" data-template="327703" style="
+                            color: #e48000;
+                            text-decoration: none;
+                            margin-right: 10px;
+                            font-size: 11px;
+                            font-weight: 650;
+                            letter-spacing: 0.33px;
+                        ">Акция</a><a href="#" class="template-link" data-template="328169" style="
+                            color: #00868f;
+                            text-decoration: none;
+                            margin-right: 10px;
+                            font-size: 11px;
+                            font-weight: 650;
+                            letter-spacing: 0.33px;
+                        ">Реализация</a><a href="#" class="template-link" data-template="328170" style="
+                            color: #ac00ae;
+                            text-decoration: none;
+                            margin-right: 10px;
+                            font-size: 11px;
+                            font-weight: 650;
+                            letter-spacing: 0.33px;
+                        ">Каталог</a>
+                    </span>
+                `);
+            }
+        }
+        
+        bindInlineEvents();
+        return true;
+    }
+    
+    return false;
+};
+
+// Альтернативный способ - поиск по селекторам из старого кода
+var createTemplateButtonsAlternative = function() {
+    // Используем селектор из исходного кода
+    var buttonContainerSelector = '.attach-first';
+    var $container = $(buttonContainerSelector);
+    
+    if ($container.length > 0 && $('#alternativeTemplateLinks').length === 0) {
+        console.log('Используем альтернативный способ размещения');
+        
+        // Делаем контейнер flex для размещения в одну строку
+        $container.css({
+            'display': 'flex !important',
+            'align-items': 'center !important',
+            'flex-wrap': 'nowrap !important'
+        });
+        
+        // Добавляем ссылки
+        $container.append(`
+            <span id="alternativeTemplateLinks" style="
+                display: inline-flex;
+                align-items: center;
+                margin-left: 15px;
+                gap: 10px;
+            ">
+                <a href="#" class="template-link" data-template="327703" style="
+                    color: #e48000;
+                    text-decoration: none;
+                    font-size: 11px;
+                    font-weight: 650;
+                    letter-spacing: 0.33px;
+                ">Акция</a><a href="#" class="template-link" data-template="328169" style="
+                    color: #00868f;
+                    text-decoration: none;
+                    font-size: 11px;
+                    font-weight: 650;
+                    letter-spacing: 0.33px;
+                ">Реализация</a><a href="#" class="template-link" data-template="328170" style="
+                    color: #ac00ae;
+                    text-decoration: none;
+                    font-size: 11px;
+                    font-weight: 650;
+                    letter-spacing: 0.33px;
+                ">Каталог</a>
+            </span>
+        `);
+        
+        bindInlineEvents();
         return true;
     }
     
@@ -311,38 +403,37 @@ var createSimpleTemplateButtons = function() {
 };
 
 // Функция привязки событий
-var bindSimpleTemplateEvents = function() {
-    $(document).off('click', '.simple-template-link');
-    $(document).on('click', '.simple-template-link', function(e) {
+var bindInlineEvents = function() {
+    $(document).off('click', '.template-link');
+    $(document).on('click', '.template-link', function(e) {
         e.preventDefault();
         
         var templateId = $(this).data('template');
         console.log('Применяем шаблон:', templateId);
         
-        // Применяем шаблон
         $(`.apply-template[href="template_${templateId}"]`).click();
         
-        // Восстанавливаем ссылки после применения
-        restoreSimpleButtons();
+        // Восстанавливаем ссылки
+        restoreInlineButtons();
     });
 };
 
-// Функция восстановления ссылок
-var restoreSimpleButtons = function() {
+// Функция восстановления
+var restoreInlineButtons = function() {
     var delays = [200, 500, 1000, 1500, 2000];
     
     delays.forEach(function(delay) {
         setTimeout(function() {
-            if ($('#simpleTemplateButtons').length === 0) {
+            if ($('#inlineTemplateLinks').length === 0 && $('#alternativeTemplateLinks').length === 0) {
                 console.log('Восстанавливаем ссылки через', delay, 'ms');
-                createSimpleTemplateButtons();
+                createInlineTemplateButtons() || createTemplateButtonsAlternative();
             }
         }, delay);
     });
 };
 
-// Наблюдатель за изменениями DOM
-var setupSimpleObserver = function() {
+// Наблюдатель
+var setupInlineObserver = function() {
     var observer = new MutationObserver(function(mutations) {
         var needRestore = false;
         
@@ -353,21 +444,20 @@ var setupSimpleObserver = function() {
                     $(target).hasClass('attach-wrapper') ||
                     $(target).hasClass('attach-first') ||
                     $(target).hasClass('text-area-box') ||
-                    $(target).find('.attach-wrapper').length > 0
+                    $(target).find('.attach-wrapper, .attach-first').length > 0
                 )) {
                     needRestore = true;
                 }
             }
         });
         
-        if (needRestore && $('#simpleTemplateButtons').length === 0) {
+        if (needRestore && $('#inlineTemplateLinks').length === 0 && $('#alternativeTemplateLinks').length === 0) {
             setTimeout(function() {
-                createSimpleTemplateButtons();
+                createInlineTemplateButtons() || createTemplateButtonsAlternative();
             }, 100);
         }
     });
     
-    // Наблюдаем за формой
     var formContainer = $('.text-area-box, .message-form').first();
     if (formContainer.length > 0) {
         observer.observe(formContainer[0], {
@@ -380,29 +470,27 @@ var setupSimpleObserver = function() {
             subtree: true
         });
     }
-    
-    return observer;
 };
 
 // Инициализация
 $(document).ready(function() {
     setTimeout(function() {
-        var created = createSimpleTemplateButtons();
+        var created = createInlineTemplateButtons() || createTemplateButtonsAlternative();
         
         if (created) {
-            setupSimpleObserver();
+            setupInlineObserver();
             
-            // Дополнительная проверка каждые 5 сек
             setInterval(function() {
-                if ($('.attach-wrapper, .attach-first').length > 0 && $('#simpleTemplateButtons').length === 0) {
-                    createSimpleTemplateButtons();
+                if ($('.attach-wrapper, .attach-first').length > 0 && 
+                    $('#inlineTemplateLinks').length === 0 && 
+                    $('#alternativeTemplateLinks').length === 0) {
+                    createInlineTemplateButtons() || createTemplateButtonsAlternative();
                 }
             }, 5000);
         } else {
-            // Повторная попытка через 2 сек
             setTimeout(function() {
-                createSimpleTemplateButtons();
-                setupSimpleObserver();
+                createInlineTemplateButtons() || createTemplateButtonsAlternative();
+                setupInlineObserver();
             }, 2000);
         }
     }, 1000);
