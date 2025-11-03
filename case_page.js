@@ -25,6 +25,19 @@ $(function() {
     }
 
     /**
+     * УДАЛЕНИЕ ССЫЛКИ "ПЕРЕСЛАТЬ"
+     */
+    $(document).ready(function() {
+        // Удаляем ссылку "Переслать" из меню действий
+        $('a[href*="forward"], .forward-link, a:contains("Переслать")').hide();
+        
+        // Дополнительная проверка через несколько секунд
+        setTimeout(function() {
+            $('a[href*="forward"], .forward-link, a:contains("Переслать")').hide();
+        }, 2000);
+    });
+
+    /**
      * ИКОНКА ОБНОВЛЕНИЯ ДАННЫХ ПОЛЬЗОВАТЕЛЯ
      */
     function addRefreshIcon() {
@@ -33,11 +46,8 @@ $(function() {
         }).first();
         
         if ($userDataHeader.length === 0) return;
-        
-        // Проверяем, не добавлена ли уже иконка
         if ($userDataHeader.find('.refresh-user-data').length > 0) return;
         
-        // CSS для анимации
         if ($('#refresh-user-data-styles').length === 0) {
             $('<style id="refresh-user-data-styles">')
                 .text(`
@@ -65,11 +75,9 @@ $(function() {
                 .appendTo('head');
         }
         
-        // Добавляем иконку
         const $icon = $('<i class="fas fa-sync-alt refresh-user-data" title="Обновить данные пользователя"></i>');
         $userDataHeader.append($icon);
         
-        // Обработчик клика
         $icon.on('click', function() {
             const $this = $(this);
             if ($this.hasClass('loading')) return;
@@ -84,36 +92,20 @@ $(function() {
         });
     }
     
-    // Функция загрузки данных (заглушка)
     function fetchUserData() {
         return new Promise((resolve) => {
-            console.log('🔄 Загрузка данных пользователя...');
-            
             // TODO: Ваш код для получения данных со стороннего ресурса
-            // Например:
-            // $.ajax({
-            //     url: 'https://your-api.com/user-data',
-            //     method: 'GET',
-            //     success: function(data) {
-            //         $('#field_1').val(data.name);
-            //         $('#field_2').val(data.email);
-            //         resolve();
-            //     }
-            // });
-            
             setTimeout(() => {
-                console.log('✅ Данные загружены!');
                 resolve();
             }, 500);
         });
     }
     
-    // Запускаем добавление иконки с задержками
     setTimeout(addRefreshIcon, 500);
     setTimeout(addRefreshIcon, 1500);
 
     /**
-     * ВСЁ ОСТАЛЬНОЕ ИЗ ВАШЕГО СКРИПТА
+     * ВСЁ ОСТАЛЬНОЕ
      */
     var URL = 'https://omnidesk.ru';
     var CASE_ID = CurrentCaseId;
@@ -126,7 +118,6 @@ $(function() {
     var INTEGRATION_PANEL_SELECTOR = '#integrations_info_panel';
     var INFORMATION_PANEL_SELECTOR = '#info_user_info_panel';
 
-    /** HELPERS */
     var checkNotUndefined = function(data) {
         return (typeof data === 'undefined') ? false : true;
     }
@@ -140,7 +131,6 @@ $(function() {
         }
     };
 
-    /** EXAMPLES */
     $(document).ready(function() {
         $('select[name="field_7608"]').prop('disabled', true).trigger('chosen:updated');
     });
@@ -288,8 +278,6 @@ $(function() {
         addEmailTemplates: function() {
             var attachFirst = $('.attach-first');
             if (attachFirst.length > 0) {
-                console.log('Добавляем кнопки шаблонов в .attach-first');
-                
                 var templateButtons = `
                     <div id="templateButtons" class="atach-items fl-left" style="margin-left: 15px;">
                         <a href="#" data-template="327703" style="color: #e48000; text-decoration: none; margin-right: 10px; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Скидки</a>
@@ -297,11 +285,7 @@ $(function() {
                         <a href="#" data-template="328170" style="color: #ac00ae; text-decoration: none; margin-right: 10px; font-size: 11px; font-weight: 650; letter-spacing: 0.33px;">Каталог</a>
                     </div>
                 `;
-                
                 attachFirst.find('.attach-button').after(templateButtons);
-                console.log('Кнопки шаблонов добавлены успешно');
-            } else {
-                console.log('Контейнер .attach-first не найден');
             }
         },
         
@@ -312,7 +296,6 @@ $(function() {
             delays.forEach(function(delay) {
                 setTimeout(function() {
                     if ($('#templateButtons').length === 0 && $('.attach-first').length > 0) {
-                        console.log('Восстанавливаем кнопки через', delay, 'ms');
                         self.initialized = false;
                         self.init();
                     }
@@ -324,7 +307,6 @@ $(function() {
     $(document).off('click', '[data-template]').on('click', '[data-template]', function(e) {
         e.preventDefault();
         var templateId = $(this).data('template');
-        console.log('Применяем шаблон:', templateId);
         $(`.apply-template[href="template_${templateId}"]`).click();
         TemplateButtons.restore();
     });
@@ -349,7 +331,6 @@ $(function() {
             
             if (needRestore && $('#templateButtons').length === 0) {
                 setTimeout(function() {
-                    console.log('Восстанавливаем кнопки через MutationObserver');
                     TemplateButtons.initialized = false;
                     TemplateButtons.init();
                 }, 100);
@@ -377,7 +358,6 @@ $(function() {
             
             setInterval(function() {
                 if ($('.attach-first').length > 0 && $('#templateButtons').length === 0) {
-                    console.log('Восстанавливаем кнопки через интервал');
                     TemplateButtons.initialized = false;
                     TemplateButtons.init();
                 }
