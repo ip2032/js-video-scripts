@@ -273,7 +273,7 @@ var TemplateButtons = {
                         font-size: 11px;
                         font-weight: 650;
                         letter-spacing: 0.33px;
-                    ">Акция</a>
+                    ">Скидки</a>
                     <a href="#" data-template="328169" style="
                         color: #00868f;
                         text-decoration: none;
@@ -281,7 +281,7 @@ var TemplateButtons = {
                         font-size: 11px;
                         font-weight: 650;
                         letter-spacing: 0.33px;
-                    ">Реализация</a>
+                    ">Доставка</a>
                     <a href="#" data-template="328170" style="
                         color: #ac00ae;
                         text-decoration: none;
