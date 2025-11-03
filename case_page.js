@@ -24,18 +24,34 @@ $(function() {
         $title.html(fullTitle);
     }
 
-    /**
-     * УДАЛЕНИЕ ССЫЛКИ "ПЕРЕСЛАТЬ"
-     */
-    $(document).ready(function() {
-        // Удаляем ссылку "Переслать" из меню действий
+/**
+ * УДАЛЕНИЕ ССЫЛКИ "ПЕРЕСЛАТЬ"
+ */
+$(document).ready(function() {
+    function hideForwardLinks() {
+        // Удаляем ссылку "Переслать" из меню действий сообщений
+        $('i.icon-share-alt, i.fa-share, i[title="Переслать"]').hide();
+        // Дополнительные варианты
         $('a[href*="forward"], .forward-link, a:contains("Переслать")').hide();
-        
-        // Дополнительная проверка через несколько секунд
-        setTimeout(function() {
-            $('a[href*="forward"], .forward-link, a:contains("Переслать")').hide();
-        }, 2000);
+    }
+    
+    // Запускаем сразу
+    hideForwardLinks();
+    
+    // И через задержки
+    setTimeout(hideForwardLinks, 1000);
+    setTimeout(hideForwardLinks, 2000);
+    
+    // Следим за изменениями DOM
+    var observer = new MutationObserver(function() {
+        hideForwardLinks();
     });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
 
     /**
      * ИКОНКА ОБНОВЛЕНИЯ ДАННЫХ ПОЛЬЗОВАТЕЛЯ
