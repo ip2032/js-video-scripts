@@ -6,16 +6,22 @@ $(function () {
         'Клиенты Telegram',
     ];
 
-    const $title = $('#current_subject span');
-    const fullTitle = $title.text().trim();
+    const $title = $('#current_subject span:first');
 
-    const matchedGroup = knownChatGroups.find(group =>
-        fullTitle.startsWith(group)
-    );
+    if ($title.length === 0) return;
 
-    if (matchedGroup) {
-        const rest = fullTitle.slice(matchedGroup.length).trimStart();
-        const highlighted = `<span style="color: #3a88cb; font-weight: bold;">${matchedGroup}</span> ${rest}`;
-        $title.html(highlighted);
-    }
+    let fullTitle = $title.text().trim();
+
+    // Подсвечиваем группы
+    knownChatGroups.forEach(group => {
+        if (fullTitle.includes(group)) {
+            const regex = new RegExp(`(${group})`, 'g');
+            fullTitle = fullTitle.replace(
+                regex,
+                '<span style="color: #059669; font-weight: 700;">$1</span>'
+            );
+        }
+    });
+
+    $title.html(fullTitle);
 });
