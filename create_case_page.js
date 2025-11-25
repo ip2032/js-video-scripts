@@ -103,7 +103,7 @@ $(function() {
     addCode(
         HORIZONTAL_MENU_ELEMENTS_SELECTOR,
         `<li class="nav-item nav-item-web-link inlb">
-            <a class="nav-item-url" href="https://omnidesk.ru">Веб-сайт</a>
+            <a class="nav-item-url" href="https://www.amocrm.ru/">amoCRM</a>
         </li>`,
         true
     );
