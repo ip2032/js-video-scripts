@@ -63,7 +63,7 @@ $(document).ready(function() {
         'background': '#ffeaea',             
         'font-weight': '650',      
         'letter-spacing': '0.6px',      
-        'font-size': '12px',      
+        'font-size': '11px',      
     });
 });
 
